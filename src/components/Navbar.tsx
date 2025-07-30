@@ -9,6 +9,7 @@ import {
   ClipboardList,
   Moon,
   Sun,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -20,9 +21,10 @@ import {
 } from "@/components/ui/tooltip";
 
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function Navbar() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [activeSection, setActiveSection] = useState("accueil");
 
   const navigate = useNavigate();
@@ -31,6 +33,14 @@ export default function Navbar() {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle("dark");
   };
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
 
   const navItems = [
     {
@@ -44,6 +54,12 @@ export default function Navbar() {
       icon: Calendar,
       tooltip: "Réservation",
       path: "/reservation",
+    },
+    {
+      id: "control",
+      icon: Eye,
+      tooltip: "Control",
+      path: "/control",
     },
     {
       id: "finance",
