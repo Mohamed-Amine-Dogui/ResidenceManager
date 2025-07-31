@@ -594,473 +594,488 @@ export default function CheckInOutPage() {
                   Inventaire à l'entrée
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Literie & Mobilier */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-slate-900 dark:text-slate-50">
-                    Literie & Mobilier
-                  </h4>
-                  <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Lits simples
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.litsSimples}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            litsSimples: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Lits doubles
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.litsDoubles}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            litsDoubles: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Matelas supplémentaires
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.matelasSupplementaires}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            matelasSupplementaires:
-                              Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Oreillers
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.oreillers}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            oreillers: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Tables
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.tables}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            tables: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Chaises
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.chaises}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            chaises: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Draps propres
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.drapsPropres}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            drapsPropres: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Draps housse
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.drapsHousse}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            drapsHousse: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Couvertures
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.couvertures}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            couvertures: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
+            </Card>
+
+            {/* Literie & Mobilier Card */}
+            <Card className="border-slate-200 dark:border-slate-800">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-slate-900 dark:text-slate-50">
+                  Literie & Mobilier
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Lits simples
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.litsSimples}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          litsSimples: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Lits doubles
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.litsDoubles}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          litsDoubles: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Matelas supplémentaires
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.matelasSupplementaires}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          matelasSupplementaires:
+                            Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Oreillers
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.oreillers}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          oreillers: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Tables
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.tables}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          tables: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Chaises
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.chaises}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          chaises: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Draps propres
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.drapsPropres}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          drapsPropres: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Draps housse
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.drapsHousse}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          drapsHousse: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Couvertures
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.couvertures}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          couvertures: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Électronique & Équipements */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-slate-900 dark:text-slate-50">
-                    Électronique & Équipements
-                  </h4>
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="television"
-                        checked={inventaire.television}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            television: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="television"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Télévision
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="telecommandeTv"
-                        checked={inventaire.telecommandeTv}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            telecommandeTv: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="telecommandeTv"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Télécommande TV
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="climatiseur"
-                        checked={inventaire.climatiseur}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            climatiseur: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="climatiseur"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Climatiseur
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="telecommandeClimatiseur"
-                        checked={inventaire.telecommandeClimatiseur}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            telecommandeClimatiseur: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="telecommandeClimatiseur"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Télécommande Climatiseur
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="recepteurTv"
-                        checked={inventaire.recepteurTv}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            recepteurTv: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="recepteurTv"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Récepteur TV
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="telecommandeRecepteur"
-                        checked={inventaire.telecommandeRecepteur}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            telecommandeRecepteur: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="telecommandeRecepteur"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Télécommande Récepteur
-                      </Label>
-                    </div>
+            {/* Électronique & Équipements Card */}
+            <Card className="border-slate-200 dark:border-slate-800">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-slate-900 dark:text-slate-50">
+                  Électronique & Équipements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 grid-cols-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="television"
+                      checked={inventaire.television}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          television: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="television"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Télévision
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="telecommandeTv"
+                      checked={inventaire.telecommandeTv}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          telecommandeTv: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="telecommandeTv"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Télécommande TV
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="climatiseur"
+                      checked={inventaire.climatiseur}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          climatiseur: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="climatiseur"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Climatiseur
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="telecommandeClimatiseur"
+                      checked={inventaire.telecommandeClimatiseur}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          telecommandeClimatiseur: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="telecommandeClimatiseur"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Télécommande Climatiseur
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="recepteurTv"
+                      checked={inventaire.recepteurTv}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          recepteurTv: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="recepteurTv"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Récepteur TV
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="telecommandeRecepteur"
+                      checked={inventaire.telecommandeRecepteur}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          telecommandeRecepteur: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="telecommandeRecepteur"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Télécommande Récepteur
+                    </Label>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Cuisine */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-slate-900 dark:text-slate-50">
-                    Cuisine
-                  </h4>
-                  <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Assiettes
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.assiettes}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            assiettes: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Verres
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.verres}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            verres: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Couverts
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.couverts}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            couverts: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Casseroles
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.casseroles}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            casseroles: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-700 dark:text-slate-300">
-                        Poêles
-                      </Label>
-                      <Input
-                        type="number"
-                        value={inventaire.poeles}
-                        onChange={(e) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            poeles: Number.parseInt(e.target.value) || 0,
-                          }))
-                        }
-                        className="border-slate-200 dark:border-slate-800 w-16"
-                        min="0"
-                        max="99"
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="refrigerateur"
-                        checked={inventaire.refrigerateur}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            refrigerateur: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="refrigerateur"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Réfrigérateur
-                      </Label>
-                    </div>
+            {/* Cuisine Card */}
+            <Card className="border-slate-200 dark:border-slate-800">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-slate-900 dark:text-slate-50">
+                  Cuisine
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Assiettes
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.assiettes}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          assiettes: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Verres
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.verres}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          verres: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Couverts
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.couverts}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          couverts: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Casseroles
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.casseroles}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          casseroles: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300">
+                      Poêles
+                    </Label>
+                    <Input
+                      type="number"
+                      value={inventaire.poeles}
+                      onChange={(e) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          poeles: Number.parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="border-slate-200 dark:border-slate-800 w-20"
+                      min="0"
+                      max="99"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="refrigerateur"
+                      checked={inventaire.refrigerateur}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          refrigerateur: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="refrigerateur"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Réfrigérateur
+                    </Label>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Autres */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-slate-900 dark:text-slate-50">
-                    Autres
-                  </h4>
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="rideaux"
-                        checked={inventaire.rideaux}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            rideaux: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="rideaux"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Rideaux présents
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="lampes"
-                        checked={inventaire.lampes}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            lampes: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="lampes"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Lampes fonctionnelles
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="balaiSerpilliere"
-                        checked={inventaire.balaiSerpilliere}
-                        onCheckedChange={(checked) =>
-                          setInventaire((prev) => ({
-                            ...prev,
-                            balaiSerpilliere: !!checked,
-                          }))
-                        }
-                      />
-                      <Label
-                        htmlFor="balaiSerpilliere"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Balai / Serpillière / Seau
-                      </Label>
-                    </div>
+            {/* Autres Card */}
+            <Card className="border-slate-200 dark:border-slate-800">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-slate-900 dark:text-slate-50">
+                  Autres
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 grid-cols-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="rideaux"
+                      checked={inventaire.rideaux}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          rideaux: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="rideaux"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Rideaux présents
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="lampes"
+                      checked={inventaire.lampes}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          lampes: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="lampes"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Lampes fonctionnelles
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="balaiSerpilliere"
+                      checked={inventaire.balaiSerpilliere}
+                      onCheckedChange={(checked) =>
+                        setInventaire((prev) => ({
+                          ...prev,
+                          balaiSerpilliere: !!checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="balaiSerpilliere"
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Balai / Serpillière / Seau
+                    </Label>
                   </div>
                 </div>
               </CardContent>
