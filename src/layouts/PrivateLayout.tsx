@@ -1,16 +1,16 @@
-// src/layoutss/MainLayout.tsx
+// src/layouts/PrivateLayout.tsx
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { Toaster } from 'sonner';
 
-const MainLayout = () => {
+const PrivateLayout = () => {
   return (
     <>
       <Navbar />
       <Outlet />
-      <Toaster/>
+      <Toaster />
     </>
   );
 };
 
-export default MainLayout;
+export default PrivateLayout;

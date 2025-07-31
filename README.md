@@ -254,7 +254,8 @@ npx shadcn@latest add select
 npx shadcn@latest add table
 npx shadcn@latest add alert-dialog
 npx shadcn@latest add resizable
-nme
+
+npx shadcn@latest add separator 
 
 ```
 
@@ -1076,6 +1077,74 @@ use effect that fitt from: https://reactbits.dev
 
 
 ---
+
+
+
+## LoginPage.tsx
+Here is your clean and complete **v0.dev prompt** for building the **`LoginPage.tsx`** in French using `shadcn/ui`, `Tailwind CSS`, `lucide-react`, and modern minimal design:
+
+---
+
+### Prompt for `LoginPage.tsx` (v0.dev)
+
+ Build a **responsive React component** (`LoginPage.tsx`) using:
+
+ * `shadcn/ui`
+ * `Tailwind CSS`
+ * `"slate"` color palette
+ * All UI text must be in **French**
+ * Clean, modern, and minimal design (inspired by shadcn)
+
+ This page represents the **login screen** of a residence manager app and must include the following:
+
+---
+
+###  Initial Layout
+
+Centered content (both vertically and horizontally) with:
+
+* app name residenceManager
+* A title or heading in French (e.g., "Connexion")
+
+---
+
+###  Buttons
+
+Two primary buttons visible initially:
+
+1. `Visiter en tant qu'invité`
+2. `Se connecter`
+
+When the user clicks **"Se connecter"**, reveal the login form below.
+
+---
+
+###  Login Form (only shown after click)
+
+Form fields:
+
+* Email (label: `Adresse e-mail`)
+* Password (label: `Mot de passe`)
+* Button: `Connexion`
+
+Below the form:
+
+* A line: `Ou se connecter avec`
+* Two social login buttons:
+
+  * `Connexion avec Google`
+  * `Connexion avec Facebook`
+
+At the bottom:
+* A clickable link: `Mot de passe oublié ?`
+
+
+---
+
+
+
+
+
 
 - Entrée:
 

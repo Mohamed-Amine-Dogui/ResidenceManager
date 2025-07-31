@@ -1,7 +1,7 @@
 // src/components/Navbar.tsx
 import { useState } from "react";
 import {
-  Home,
+  CircleGauge,
   Calendar,
   CreditCard,
   Wrench,
@@ -44,9 +44,9 @@ export default function Navbar() {
 
   const navItems = [
     {
-      id: "accueil",
-      icon: Home,
-      tooltip: "Accueil",
+      id: "dashboard",
+      icon: CircleGauge,
+      tooltip: "Dashboard",
       path: "/",
     },
     {
