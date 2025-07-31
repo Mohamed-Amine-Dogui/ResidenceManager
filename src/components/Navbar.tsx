@@ -74,10 +74,10 @@ export default function Navbar() {
       path: "/maintenance",
     },
     {
-      id: "checkin",
+      id: "checkinout",
       icon: UserCheck,
       tooltip: "Arrivée/Départ",
-      path: "/checkin",
+      path: "/checkinout",
     },
     {
       id: "checklist",

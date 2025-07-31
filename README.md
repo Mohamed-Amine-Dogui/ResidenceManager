@@ -219,12 +219,33 @@ npm run deploy
 --
 For icons check : https://lucide.dev/icons/
 
-For more Fancy react Effects check  :https://reactbits.dev/backgrounds/ballpit
+For more Fancy react Effects check  :
+
+https://reactbits.dev/backgrounds/ballpit
+https://cssbuttons.io
+viewport-ui.design
+https://reactbits.dev/backgrounds/waves
+https://reactbits.dev/backgrounds/threads
+
+ https://reactbits.dev/animations/star-border
+ https://reactbits.dev/text-animations/split-text
+ https://reactbits.dev/text-animations/shiny-text
+ https://reactbits.dev/text-animations/decrypted-text
+ https://reactbits.dev/animations/animated-content
+ https://reactbits.dev/animations/fade-content
+ https://reactbits.dev/text-animations/text-type
+ https://reactbits.dev/text-animations/falling-text
+ https://reactbits.dev/components/circular-gallery
+ https://reactbits.dev/components/magic-bento
+ https://reactbits.dev/components/profile-card
+ https://reactbits.dev/components/carousel
+ https://reactbits.dev/components/spotlight-card
 
 
+```bash
 npm install lucide-react
+npm install sonner
 npm install react-router-dom
-
 npm install date-fns
 npm install recharts
 npx shadcn@latest add calendar
@@ -233,17 +254,17 @@ npx shadcn@latest add tooltip
 npx shadcn@latest add button
 npx shadcn@latest add popover
 npx shadcn@latest add chart
-
 npx shadcn@latest add checkbox
 npx shadcn@latest add input
 npx shadcn@latest add label
 npx shadcn@latest add select
 npx shadcn@latest add table
 npx shadcn@latest add alert-dialog
+npx shadcn@latest add resizable
+nme
 
-npm install sonner
+```
 
----
 
 ---
 
@@ -904,6 +925,161 @@ this is for mocking the backend
   ]
 }
 ```
+
+
+---
+
+
+
+
+---
+
+
+Build a responsive React component (CheckInOutPage.tsx.tsx) using shadcn/ui and Tailwind CSS with a minimalistic and modern design.
+
+The layout must be responsive for mobile and desktop, clean, modern, and easy to read.
+Use the "slate" color palette, and support both dark mode and normal mode, controlled via a toggle in the existing navbar.
+
+All UI content must be in French (labels, inputs, table headers, button texts, toasts, etc.).
+Use lucide-react for icons where appropriate.
+
+This page represents the Checkliste page of a residence manager app. It must include the following:
+
+use import { Toaster, toast } from "sonner";
+
+use effect from this : https://reactbits.dev 
+
+
+
+
+
+---
+
+**Prompt for v0.dev:**
+
+ Build a responsive React component (`CheckInOutPage.tsx`) using **shadcn/ui**, **Tailwind CSS**, and **lucide-react** icons.
+
+ The layout must be responsive for mobile and desktop, with a clean and modern design in shadcn style.
+ Use the **"slate" color palette** and support **dark mode and light mode**, toggled via an existing navbar.
+
+ All UI content (labels, headers, buttons, placeholders, toasts) must be in **French**.
+ Use `import { Toaster, toast } from "sonner"` for toast messages.
+
+
+use effect that fitt from: https://reactbits.dev 
+ ### Panel 1 – Check-in
+
+ #### 1. House Selector
+
+ A dropdown (`Select`) to choose a house from this list:
+
+ ```ts
+ const houses = [
+   { id: "maison-1", name: "Mv1" },
+   { id: "maison-2", name: "Mv2" },
+   { id: "maison-3", name: "Mv3" },
+   { id: "maison-4", name: "Mv4" },
+   { id: "maison-5", name: "Mv5" },
+   { id: "maison-6", name: "Mv6" },
+   { id: "maison-7", name: "Mv7" },
+   { id: "maison-8", name: "Mv8" },
+   { id: "maison-9", name: "Mv9" },
+   { id: "maison-10", name: "Mv10" },
+   { id: "maison-bg", name: "Bg" },
+   { id: "maison-high", name: "High" },
+ ];
+ ```
+
+ #### 2. Client Info
+
+ A form with the following inputs:
+
+ * Nom
+ * Téléphone
+ * Email
+ * Date d’arrivée
+ * Date de départ
+ * Paiement : montant payé, montant restant, montant total
+
+ #### 3. État de l’équipement (Inventaire à l’entrée)
+
+ Organize the checklist into **grouped sections**, with a mix of:
+
+ * `InputNumber` for items with expected quantities
+ * `Checkbox` for availability confirmation
+ * `Textarea` for optional remarks or damaged/missing info
+
+ ##### Literie & Mobilier
+
+ * Lits simples (2 par défaut)
+ * Lits doubles (1 par défaut)
+ * Matelas supplémentaires
+ * Oreillers disponibles
+ * Tables
+ * Chaises
+ * Draps propres
+ * Draps housse
+ * Couvertures
+
+ ##### Électronique & Équipements
+
+ * Télévision (checkbox)
+ * Télécommande TV (checkbox)
+ * Climatiseur (checkbox)
+ * Télécommande Climatiseur (checkbox)
+ * Récepteur TV (optional checkbox)
+ * Télécommande Récepteur (optional checkbox)
+
+ ##### Cuisine
+
+ * Assiettes
+ * Verres
+ * Couverts
+ * Casseroles / Marmites
+ * Poêles
+ * Réfrigérateur (optional checkbox)
+
+ ##### Autres
+
+ * Rideaux présents (checkbox)
+ * Lampes fonctionnelles (checkbox)
+ * Balai / Serpillière / Seau (checkbox)
+
+ #### 4. Final Action
+
+ * Button: `Valider l’état des lieux`
+ * Optional input: Nom ou signature du responsable du check-in
+
+ Show a toast success message after submission (`Check-in enregistré avec succès`).
+
+ ---
+
+ ### Panel 2 – Check-out
+
+ #### Step 1
+
+ Ask the user to:
+
+ * Enter Nom du client
+ * Select Date d’arrivée
+ * Choose Maison
+
+ #### Step 2
+
+ Once the record is found (simulate), show all the items from the original check-in inventory as **readonly checkboxes**.
+
+ * User can verify and check if the items are still present and functional
+ * Optional field: Commentaire final
+
+ #### Final Action
+
+ * Button: `Valider le départ`
+ * Toast confirmation: `Check-out enregistré. La maison est maintenant disponible.`
+
+ ---
+
+ Use French UI, minimal modern design (shadcn style), slate color palette, and good structure. The resizable layout should clearly split Check-in and Check-out sections, and allow the user to focus on one side at a time.
+
 
 
 ---
