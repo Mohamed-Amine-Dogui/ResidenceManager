@@ -197,20 +197,13 @@ export default defineConfig(
 );
 ```
 
-| Env             | `base` value         | Behaviour                                        |
-| --------------- | -------------------- | ------------------------------------------------ |
-| `npm run dev`   | `/`                  | Lokal läuft alles unter `http://localhost:3000/` |
-| `npm run build` | `/ResidenceManager/` | Wird korrekt für GitHub Pages gebaut             |
-
----
-
-1. For Development
+1. For Development (http://localhost:3000)
 
 ```bash
 npm run dev
 ```
 
-2. For Deployment :
+2. For Deployment : (https://mohamed-amine-dogui.github.io/ResidenceManager/)
 
 ```bash
 npm run deploy
