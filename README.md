@@ -235,6 +235,15 @@ https://reactbits.dev/backgrounds/threads
  https://reactbits.dev/components/spotlight-card
 
 
+## Adding reactbits effect: 
+```bash
+step 1: 
+npx jsrepo init https://reactbits.dev/ts/tailwind
+
+Step 2:
+npx jsrepo add https://reactbits.dev/ts/tailwind/Backgrounds/Threads
+```
+
 ```bash
 npm install lucide-react
 npm install sonner

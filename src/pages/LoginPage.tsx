@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Threads from "@/components/backgrounds/Backgrounds/Threads/Threads";
+import BlurText from "@/components/backgrounds/TextAnimations/BlurText/BlurText";
 
 export default function LoginPage() {
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -17,6 +19,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
+
+  const handleAnimationComplete = () => {
+    console.log("Animation completed!");
+  };
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -50,7 +56,14 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+      {/* Threads Background */}
+      <div className="absolute inset-0 z-0">
+        <Threads amplitude={1.2} distance={0.9} enableMouseInteraction />
+      </div>
+
+      {/* Foreground content */}
+
+      <div className="w-full max-w-md space-y-8 relative z-10">
         {/* Hero */}
         <div className="text-center space-y-2">
           <div className="flex flex-col items-center justify-center mb-4 space-y-2">
@@ -64,9 +77,14 @@ export default function LoginPage() {
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
                   residenceManager
                 </h1>
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-50 mt-1">
-                  Simple et précis, tout est bien saisi.
-                </p>
+                <BlurText
+                  text="Simple et précis, tout est bien saisi."
+                  delay={150}
+                  animateBy="words"
+                  direction="top"
+                  onAnimationComplete={handleAnimationComplete}
+                  className="text-sm font-semibold text-slate-900 dark:text-slate-50 mt-1"
+                />
               </div>
             </div>
           </div>
