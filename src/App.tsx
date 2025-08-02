@@ -17,6 +17,7 @@ import ControlPage from "./pages/ControlPage";
 import CheckinCheckoutPage from "./pages/CheckInOutPage";
 import DashBoardPage from "./pages/DashBoardPage";
 import MaintenancePage from "./pages/MaintenancePage";
+import FinancePage from "./pages/FinancePage";
 
 const App = () => {
   const router = createHashRouter(
@@ -31,10 +32,11 @@ const App = () => {
         <Route path="/" element={<PrivateLayout />}>
           <Route path="/dashboard" element={<DashBoardPage />} />
           <Route path="/reservation" element={<ReservationPage />} />
-          <Route path="/checklist" element={<CheckListePage />} />
           <Route path="/control" element={<ControlPage />} />
-          <Route path="/checkinout" element={<CheckinCheckoutPage />} />
+          <Route path="/finance" element={<FinancePage />} />
           <Route path="/maintenance" element={<MaintenancePage />} />
+          <Route path="/checkinout" element={<CheckinCheckoutPage />} />
+          <Route path="/checklist" element={<CheckListePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </>

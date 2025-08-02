@@ -50,6 +50,12 @@ export default function Navbar() {
       path: "/dashboard",
     },
     {
+      id: "finance",
+      icon: CreditCard,
+      tooltip: "Finance",
+      path: "/finance",
+    },
+    {
       id: "reservation",
       icon: Calendar,
       tooltip: "Réservation",
@@ -61,12 +67,7 @@ export default function Navbar() {
       tooltip: "Control",
       path: "/control",
     },
-    {
-      id: "finance",
-      icon: CreditCard,
-      tooltip: "Finance",
-      path: "/finance",
-    },
+
     {
       id: "maintenance",
       icon: Wrench,

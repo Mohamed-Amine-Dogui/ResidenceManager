@@ -1,0 +1,133 @@
+Build a responsive React component (`FinancePage.tsx`) using **shadcn/ui** and **Tailwind CSS**, with a **minimalistic and modern design** (shadcn style).
+
+The layout must be responsive for mobile and desktop, with a clean and modern design in shadcn style.
+Use the **"slate" color palette**, and support **dark mode and light mode**, toggled through the existing navbar.
+ 
+**All UI content must be in French** (labels, buttons, toasts, etc.).
+Use `lucide-react` for icons.
+Use `sonner` for toast notifications.
+
+This page represents the **Suivi Financier for a residence manager app.
+
+## **Nom de la page** : Suivi Financier
+
+
+
+La page Finance permet au gestionnaire de résidence de **centraliser tous les flux monétaires**, maison par maison, avec une **visualisation claire** des **entrées** (revenus) et **sorties** (dépenses), et un accès rapide à l’historique, l’origine et les justifications de chaque opération.
+Elle offre aussi un **tableau de bord annuel** pour analyser les résultats mensuels de manière visuelle.
+
+---
+
+## **1. Types d'opérations gérées**
+
+### A. Entrées d’argent
+
+* Avance pour réservation
+* Paiement du solde lors du check-in ou du check-out
+* Autres revenus manuellement ajoutés
+
+### B. Sorties d’argent
+
+* Frais de maintenance (main d’œuvre + matériaux)
+* Paiement des employés
+* Autres dépenses diverses
+
+---
+
+## **2. Génération automatique des opérations financières**
+
+Des lignes sont **créées automatiquement** dans la page Finance en fonction d’événements clés dans les autres pages :
+
+| Source      | Déclencheur                 | Type   | Motif                    | Données injectées                                      |
+| ----------- | --------------------------- | ------ | ------------------------ | ------------------------------------------------------ |
+| Réservation | Confirmation                | Entrée | Avance réservation       | Maison, date, montant avance                           |
+| CheckIn/Out | Check-in ou Check-out       | Entrée | Solde réservation        | Maison, date, montant payé                             |
+| Maintenance | Panne marquée comme résolue | Sortie | Réparation / Maintenance | Maison, date, prix des matériaux, prix de main d’œuvre |
+
+Chaque opération générée automatiquement porte une **étiquette d’origine** et peut inclure une **pièce jointe** (facture, image, etc.).
+
+---
+
+## **3. Tableaux de données**
+
+### A. Tableau principal – Toutes les opérations
+
+Affiche toutes les entrées et sorties confondues
+Colonnes :
+
+* Actions (Éditer / Supprimer)
+* Date de l’opération
+* Maison concernée
+* Type (Entrée / Sortie)
+* Motif (réservation, réparation, etc.)
+* Montant
+* Origine (Réservation, Maintenance, Manuel, etc.)
+
+### B. Tableau des entrées
+
+Filtre automatique sur les revenus
+Colonnes identiques au tableau principal
+
+### C. Tableau des sorties
+
+Filtre automatique sur les dépenses
+Colonnes identiques au tableau principal
+
+---
+
+## **4. Filtres globaux**
+
+Filtres situés en haut de la page, agissant sur tous les tableaux et le graphique :
+
+* **Maison** (liste déroulante)
+* **Mois** (sélecteur ou dropdown)
+* **Année** (sélecteur ou champ numérique)
+* **Type d’origine** (optionnel : Réservation, Maintenance, Manuel)
+
+Par défaut, l’année en cours et toutes les maisons sont sélectionnées.
+
+---
+
+## **5. Ajout manuel d’une opération**
+
+Un bouton **“Ajouter une opération financière”** ouvre un formulaire avec les champs suivants :
+
+* **Type** : Entrée ou Sortie
+* **Maison concernée**
+* **Date de l’opération**
+* **Motif**
+* **Montant**
+* **Pièce jointe (facultatif)** : facture, photo ou preuve
+
+Une fois validée, l’opération est ajoutée dans les tableaux correspondants, avec mise à jour automatique du graphique.
+
+---
+
+## **6. Visualisation graphique annuelle**
+
+En bas de la page, un **bar chart** permet une lecture claire des flux mensuels :
+
+* **Axe X** : les 12 mois de l’année
+* **Axe Y** : montant en euros
+* **Deux barres par mois** : une pour les **entrées**, une pour les **sorties**
+* **Légende claire** : couleur différente pour chaque type
+* **Filtrable par maison et année** (mêmes filtres que les tableaux)
+
+---
+
+## **7. Fonctionnalités complémentaires**
+
+* **Éditer une ligne** : permet de modifier les données saisies (manuelles uniquement)
+* **Supprimer une ligne** : message de confirmation avant suppression
+* **Origine cliquable** : lorsqu’une opération provient d’une autre page, possibilité d’ouvrir cette page (ex. voir la panne, voir la réservation)
+* **Étiquette d’origine** : visuelle (badge ou icône) pour distinguer les lignes générées automatiquement
+* **Export PDF / Excel** : export des opérations financières pour archivage ou comptabilité
+* **Résumé global** : un encadré en haut ou sur le côté peut afficher :
+
+  * Total des entrées sur la période sélectionnée
+  * Total des sorties
+  * Solde actuel (entrées - sorties)
+
+
+
+// src/pages/FinancePage.tsx

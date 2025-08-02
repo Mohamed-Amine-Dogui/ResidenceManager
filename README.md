@@ -267,8 +267,13 @@ npx shadcn@latest add separator
 npx shadcn@latest add dialog
 npx shadcn@latest add accordion
 
+npx shadcn@latest add tabs
+npx shadcn@latest add badge
+
 
 ```
+
+
 
 
 ---
