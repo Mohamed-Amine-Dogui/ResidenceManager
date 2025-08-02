@@ -1,5 +1,6 @@
-import type React from "react";
+// src/pages/CheckListPage.tsx
 
+import type React from "react";
 import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -301,6 +302,7 @@ export default function CheckListePage() {
     ) {
       toast.error("Erreur", {
         description: "Veuillez remplir tous les champs obligatoires",
+        duration: 2000,
       });
       return;
     }
@@ -322,11 +324,13 @@ export default function CheckListePage() {
       setEditingEntry(null);
       toast.success("Étape mise à jour", {
         description: "L'étape a été mise à jour avec succès",
+        duration: 700,
       });
     } else {
       setChecklistEntries((prev) => [...prev, entryData]);
       toast.success("Étape ajoutée avec succès", {
         description: "La nouvelle étape a été ajoutée à la checklist",
+        duration: 700,
       });
     }
 
@@ -363,6 +367,7 @@ export default function CheckListePage() {
       );
       toast.success("Étape supprimée", {
         description: "L'étape a été supprimée avec succès",
+        duration: 700,
       });
     }
     setDeleteDialogOpen(false);

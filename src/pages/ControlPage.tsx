@@ -302,6 +302,7 @@ export default function ControlPage() {
           }));
           toast.success("Catégorie marquée comme prête", {
             description: `${category.name} est maintenant prête`,
+            duration: 2000,
           });
           return { ...category, tasks: updatedTasks, isReady: true };
         }
@@ -317,6 +318,7 @@ export default function ControlPage() {
         description: `${
           houses.find((h) => h.id === selectedHouse)?.name
         } est maintenant 100% prête`,
+        duration: 1000,
       });
     }
   }, [isFullyReady, readyCategories, selectedHouse]);

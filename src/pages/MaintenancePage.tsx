@@ -1,7 +1,4 @@
-"use client";
-
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -182,6 +179,7 @@ export default function MaintenancePage() {
     if (!formData.maison || !formData.typePanne || !formData.assigne) {
       toast.error("Erreur", {
         description: "Veuillez remplir tous les champs obligatoires",
+        duration: 2000,
       });
       return;
     }
@@ -209,11 +207,13 @@ export default function MaintenancePage() {
       setEditingIssue(null);
       toast.success("Panne mise à jour", {
         description: "La panne a été mise à jour avec succès",
+        duration: 1000,
       });
     } else {
       setIssues((prev) => [...prev, issueData]);
       toast.success("Panne déclarée", {
         description: "La nouvelle panne a été déclarée avec succès",
+        duration: 1000,
       });
     }
 
@@ -260,6 +260,7 @@ export default function MaintenancePage() {
       setIssues((prev) => prev.filter((issue) => issue.id !== issueToDelete));
       toast.success("Panne supprimée", {
         description: "La panne a été supprimée avec succès",
+        duration: 1000,
       });
     }
     setDeleteDialogOpen(false);
@@ -562,6 +563,7 @@ export default function MaintenancePage() {
                           toast.success("Panne résolue", {
                             description:
                               "La panne est maintenant marquée comme résolue",
+                            duration: 1000,
                           });
                         }}
                         className="bg-cyan-900 hover:bg-cyan-600 text-white"
