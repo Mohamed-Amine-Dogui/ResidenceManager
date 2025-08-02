@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Threads from "@/components/backgrounds/Backgrounds/Threads/Threads";
-import BlurText from "@/components/backgrounds/TextAnimations/BlurText/BlurText";
+import Threads from "@/components/reactbits/Backgrounds/Threads/Threads";
+import BlurText from "@/components/reactbits/TextAnimations/BlurText/BlurText";
+import logo from "@/assets/logo.png";
 
 export default function LoginPage() {
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -69,7 +70,7 @@ export default function LoginPage() {
           <div className="flex flex-col items-center justify-center mb-4 space-y-2">
             <div className="flex items-center justify-center space-x-3">
               <img
-                src="favico.png"
+                src={logo}
                 alt="Logo"
                 className="h-16 w-16 rounded-full shadow-md"
               />

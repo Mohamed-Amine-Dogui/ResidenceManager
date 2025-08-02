@@ -16,6 +16,7 @@ import CheckListePage from "./pages/CheckListPage";
 import ControlPage from "./pages/ControlPage";
 import CheckinCheckoutPage from "./pages/CheckInOutPage";
 import DashBoardPage from "./pages/DashBoardPage";
+import MaintenancePage from "./pages/MaintenancePage";
 
 const App = () => {
   const router = createHashRouter(
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/checklist" element={<CheckListePage />} />
           <Route path="/control" element={<ControlPage />} />
           <Route path="/checkinout" element={<CheckinCheckoutPage />} />
+          <Route path="/maintenance" element={<MaintenancePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </>

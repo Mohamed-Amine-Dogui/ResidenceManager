@@ -22,12 +22,12 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 export default function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [activeSection, setActiveSection] = useState("accueil");
-
   const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -47,7 +47,7 @@ export default function Navbar() {
       id: "dashboard",
       icon: CircleGauge,
       tooltip: "Dashboard",
-      path: "/",
+      path: "/dashboard",
     },
     {
       id: "reservation",
@@ -96,23 +96,19 @@ export default function Navbar() {
             <TooltipProvider>
               {navItems.map((item) => {
                 const Icon = item.icon;
+                const isActive = location.pathname === item.path;
                 return (
                   <Tooltip key={item.id}>
                     <TooltipTrigger asChild>
                       <Button
-                        variant={
-                          activeSection === item.id ? "default" : "ghost"
-                        }
+                        variant={isActive ? "default" : "ghost"}
                         size="sm"
                         className={`h-9 w-9 shrink-0 ${
-                          activeSection === item.id
+                          isActive
                             ? "bg-slate-900 text-slate-50 hover:bg-slate-900/90 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/90"
                             : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
                         }`}
-                        onClick={() => {
-                          setActiveSection(item.id);
-                          navigate(item.path);
-                        }}
+                        onClick={() => navigate(item.path)}
                       >
                         <Icon className="h-4 w-4" />
                         <span className="sr-only">{item.tooltip}</span>

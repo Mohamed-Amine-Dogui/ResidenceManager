@@ -263,8 +263,10 @@ npx shadcn@latest add select
 npx shadcn@latest add table
 npx shadcn@latest add alert-dialog
 npx shadcn@latest add resizable
-
 npx shadcn@latest add separator 
+npx shadcn@latest add dialog
+npx shadcn@latest add accordion
+
 
 ```
 
@@ -273,7 +275,7 @@ npx shadcn@latest add separator
 
 **Prompt for v0.dev:**
 
-## HomePage.jsx
+## DashboardPage.jsx
 
 Build a responsive React component (page) using shadcn/ui and Tailwind CSS with a minimalistic and modern design.
 
@@ -281,7 +283,7 @@ The design must support both light mode and dark mode, using the "slate" color p
 
 The **content of the UI must be entirely in French** (labels, text, headings, etc.).
 
-This page represents the **Accueil (Dashboard) page** of a residence manager app and should include:
+This page represents the **Dashboard page** of a residence manager app and should include:
 
 ### 1. Date Picker
 
@@ -1090,9 +1092,6 @@ use effect that fitt from: https://reactbits.dev
 
 
 ## LoginPage.tsx
-Here is your clean and complete **v0.dev prompt** for building the **`LoginPage.tsx`** in French using `shadcn/ui`, `Tailwind CSS`, `lucide-react`, and modern minimal design:
-
----
 
 ### Prompt for `LoginPage.tsx` (v0.dev)
 
@@ -1150,10 +1149,88 @@ At the bottom:
 
 ---
 
+## MaintenancePage.tsx
+
+Build a responsive React component (`MaintenancePage.tsx`) using **shadcn/ui** and **Tailwind CSS**, with a **minimalistic and modern design** (shadcn style).
+
+The layout must be responsive for mobile and desktop, with a clean and modern design in shadcn style.
+Use the **"slate" color palette**, and support **dark mode and light mode**, toggled through the existing navbar.
+ 
+**All UI content must be in French** (labels, buttons, toasts, etc.).
+Use `lucide-react` for icons.
+Use `sonner` for toast notifications.
+
+This page represents the **interface de gestion des pannes** (maintenance issues) for a residence manager app.
+
+---
+
+### 1. Formulaire de déclaration d’une panne
+
+The form allows the user to declare a new maintenance issue. It contains the following fields:
+
+* **Sélectionner une maison** : dropdown with the 13 houses (Mv1–Mv10, Bg, High)
+* **Type de panne** : dropdown with predefined categories (électricité, plomberie, électroménager, peinture)
+* **Date de déclaration** : date input (defaults to today)
+* **Assigné** : input field for the name of the person responsible
+* **Commentaire** : free text input
+* **Statut** : toggle, default to "Non résolue"
+* **Photo de la panne** : image upload
+* **Photo de la facture de matériel** : hidden by default, becomes visible only when editing and resolving a panne
+* **Prix de main d’œuvre** : hidden by default, becomes visible only when editing and resolving a panne
+* **Bouton Valider** : saves the panne and refreshes the table
+
+---
+
+### 2. Filtres
+
+The user can filter the maintenance list using:
+
+* **Statut** : toggle between "Résolue" and "Non résolue"
+* **Maison** : dropdown (defaults to Mv1)
+* **Date de déclaration** : optional date input
+
+---
+
+### 3. Boutons d’action
+
+* **Déclarer une panne** : opens the form to submit a new issue
+* **Résoudre la panne** : only appears when a row is selected and edited, allows changing the status to "Résolue" and reveals hidden fields (photo de facture + prix main d’œuvre)
+
+---
+
+### 4. Tableau des pannes
+
+Displays the list of all maintenance issues based on current filters. Columns include:
+
+* **Actions** : Edit and Delete buttons
+* **Maison**
+* **Type de panne**
+* **Date de déclaration**
+* **Assigné**
+* **Commentaire**
+* **Statut**
+* **Photo de la panne**
+* **Photo de la facture de matériel** (only shown if status is "Résolue")
+* **Prix de main d’œuvre** (only shown if status is "Résolue")
+
+---
+
+### 5. Comportement des actions
+
+* **Éditer** : loads the row data into the form, making hidden fields visible if the status is updated to "Résolue"
+* **Supprimer** : shows a confirmation toast ("Êtes-vous sûr de vouloir supprimer cette panne ?"). Upon confirmation, the row is deleted and the table is refreshed
+
+---
 
 
 
 
+
+
+
+
+
+---
 
 - Entrée:
 
