@@ -1,3 +1,5 @@
+"use client";
+
 import type React from "react";
 
 import { useState, useEffect } from "react";
@@ -11,6 +13,7 @@ import {
   Check,
   X,
   Notebook,
+  CircleX,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -107,6 +110,13 @@ export default function MaintenancePage() {
   const [issueToDelete, setIssueToDelete] = useState<string | null>(null);
   const [accordionValue, setAccordionValue] = useState<string>("");
 
+  // Image modal state
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{
+    src: string;
+    title: string;
+  } | null>(null);
+
   // Form state
   const [formData, setFormData] = useState({
     maison: "",
@@ -184,8 +194,9 @@ export default function MaintenancePage() {
       assigne: formData.assigne,
       commentaire: formData.commentaire,
       statut: formData.statut,
-      photoPanne: formData.photoPanne?.name || undefined,
-      photoFacture: formData.photoFacture?.name || undefined,
+      photoPanne: formData.photoPanne || undefined,
+      photoFacture: formData.photoFacture || undefined,
+
       prixMainOeuvre: formData.prixMainOeuvre
         ? Number.parseFloat(formData.prixMainOeuvre)
         : undefined,
@@ -260,6 +271,16 @@ export default function MaintenancePage() {
     field: "photoPanne" | "photoFacture"
   ) => {
     setFormData((prev) => ({ ...prev, [field]: file }));
+  };
+
+  const handleImageClick = (imageSrc: string, title: string) => {
+    setSelectedImage({ src: imageSrc, title });
+    setImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setImageModalOpen(false);
+    setSelectedImage(null);
   };
 
   return (
@@ -761,13 +782,53 @@ export default function MaintenancePage() {
                             : "Non résolue"}
                         </span>
                       </TableCell>
+
                       <TableCell className="text-slate-600 dark:text-slate-400">
-                        {issue.photoPanne ? "📷" : "-"}
+                        {issue.photoPanne ? (
+                          <button
+                            onClick={() => {
+                              const imageUrl =
+                                issue.photoPanne instanceof File
+                                  ? URL.createObjectURL(issue.photoPanne)
+                                  : issue.photoPanne;
+
+                              if (typeof imageUrl === "string") {
+                                handleImageClick(imageUrl, "Photo de la panne");
+                              }
+                            }}
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer text-lg"
+                          >
+                            📷
+                          </button>
+                        ) : (
+                          "-"
+                        )}
                       </TableCell>
                       {filters.statut === "resolue" && (
                         <>
                           <TableCell className="text-slate-600 dark:text-slate-400">
-                            {issue.photoFacture ? "📷" : "-"}
+                            {issue.photoFacture ? (
+                              <button
+                                onClick={() => {
+                                  const imageUrl =
+                                    issue.photoFacture instanceof File
+                                      ? URL.createObjectURL(issue.photoFacture)
+                                      : issue.photoFacture;
+
+                                  if (typeof imageUrl === "string") {
+                                    handleImageClick(
+                                      imageUrl,
+                                      "Photo de la facture"
+                                    );
+                                  }
+                                }}
+                                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer text-lg"
+                              >
+                                📷
+                              </button>
+                            ) : (
+                              "-"
+                            )}
                           </TableCell>
                           <TableCell className="text-slate-600 dark:text-slate-400">
                             {issue.prixMainOeuvre
@@ -783,6 +844,35 @@ export default function MaintenancePage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Image Modal */}
+        {imageModalOpen && selectedImage && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div className="relative bg-white dark:bg-slate-950 rounded-lg max-w-4xl max-h-[90vh] overflow-hidden">
+              {/* Close button */}
+              <button
+                onClick={closeImageModal}
+                className="absolute top-4 right-4 z-10 bg-white dark:bg-slate-800 rounded-full p-2 shadow-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              >
+                <CircleX className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+              </button>
+
+              {/* Image container */}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">
+                  {selectedImage.title}
+                </h3>
+                <div className="flex justify-center">
+                  <img
+                    src={selectedImage.src || "/placeholder.svg"}
+                    alt={selectedImage.title}
+                    className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
