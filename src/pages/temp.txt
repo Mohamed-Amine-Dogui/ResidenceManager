@@ -1,331 +1,416 @@
-Build a responsive React component (`FinancePage.tsx`) using **shadcn/ui** and **Tailwind CSS**, with a **minimalistic and modern design** (shadcn style).
-
-The layout must be responsive for mobile and desktop, with a clean and modern design in shadcn style.
-Use the **"slate" color palette**, and support **dark mode and light mode**, toggled through the existing navbar.
- 
-**All UI content must be in French** (labels, buttons, toasts, etc.).
-Use `lucide-react` for icons.
-Use `sonner` for toast notifications.
-
-This page represents the **Suivi Financier for a residence manager app.
-
-## **Nom de la page** : Suivi Financier
 
 
+### **1. `users`**
 
-La page Finance permet au gestionnaire de résidence de **centraliser tous les flux monétaires**, maison par maison, avec une **visualisation claire** des **entrées** (revenus) et **sorties** (dépenses), et un accès rapide à l’historique, l’origine et les justifications de chaque opération.
-Elle offre aussi un **tableau de bord annuel** pour analyser les résultats mensuels de manière visuelle.
+| Field           | Type       | Notes                                |
+| --------------- | ---------- | ------------------------------------ |
+| `id`            | UUID / INT | Primary key                          |
+| `email`         | VARCHAR    | Unique, indexed                      |
+| `password_hash` | VARCHAR    | Store hashed password only           |
+| `role`          | VARCHAR    | e.g., `'user'`, `'admin'`, `'guest'` |
+| `created_at`    | TIMESTAMP  | Auto-generated                       |
+| `last_login`    | TIMESTAMP  | Updated on each login                |
 
 ---
 
-## **1. Types d'opérations gérées**
+### **2. `auth_providers`**
 
-### A. Entrées d’argent
-
-* Avance pour réservation
-* Paiement du solde lors du check-in ou du check-out
-* Autres revenus manuellement ajoutés
-
-### B. Sorties d’argent
-
-* Frais de maintenance (main d’œuvre + matériaux)
-* Paiement des employés
-* Autres dépenses diverses
+| Field           | Type       | Notes                                     |
+| --------------- | ---------- | ----------------------------------------- |
+| `id`            | UUID / INT | Primary key                               |
+| `provider_name` | VARCHAR    | e.g., `'email'`, `'google'`, `'facebook'` |
+| `description`   | TEXT       | Optional                                  |
 
 ---
 
-## **2. Génération automatique des opérations financières**
+### **3. `user_providers`** (Join table for external logins)
 
-Des lignes sont **créées automatiquement** dans la page Finance en fonction d’événements clés dans les autres pages :
-
-| Source      | Déclencheur                 | Type   | Motif                    | Données injectées                                      |
-| ----------- | --------------------------- | ------ | ------------------------ | ------------------------------------------------------ |
-| Réservation | Confirmation                | Entrée | Avance réservation       | Maison, date, montant avance                           |
-| CheckIn/Out | Check-in ou Check-out       | Entrée | Solde réservation        | Maison, date, montant payé                             |
-| Maintenance | Panne marquée comme résolue | Sortie | Réparation / Maintenance | Maison, date, prix des matériaux, prix de main d’œuvre |
-
-Chaque opération générée automatiquement porte une **étiquette d’origine** et peut inclure une **pièce jointe** (facture, image, etc.).
+| Field         | Type       | Notes                        |
+| ------------- | ---------- | ---------------------------- |
+| `id`          | UUID / INT | Primary key                  |
+| `user_id`     | UUID / INT | FK to `users`                |
+| `provider_id` | UUID / INT | FK to `auth_providers`       |
+| `external_id` | VARCHAR    | e.g., Google or Facebook UID |
+| `linked_at`   | TIMESTAMP  | When the account was linked  |
 
 ---
 
-## **3. Tableaux de données**
+### **4. `login_attempts`**
 
-### A. Tableau principal – Toutes les opérations
-
-Affiche toutes les entrées et sorties confondues
-Colonnes :
-
-* Actions (Éditer / Supprimer)
-* Date de l’opération
-* Maison concernée
-* Type (Entrée / Sortie)
-* Motif (réservation, réparation, etc.)
-* Montant
-* Origine (Réservation, Maintenance, Manuel, etc.)
-
-### B. Tableau des entrées
-
-Filtre automatique sur les revenus
-Colonnes identiques au tableau principal
-
-### C. Tableau des sorties
-
-Filtre automatique sur les dépenses
-Colonnes identiques au tableau principal
+| Field        | Type       | Notes                                 |
+| ------------ | ---------- | ------------------------------------- |
+| `id`         | UUID / INT | Primary key                           |
+| `user_id`    | UUID / INT | FK to `users` (nullable for guests)   |
+| `email`      | VARCHAR    | Used for login even if user not found |
+| `success`    | BOOLEAN    | Indicates if login was successful     |
+| `provider`   | VARCHAR    | `'email'`, `'google'`, etc.           |
+| `ip_address` | VARCHAR    | Optional                              |
+| `timestamp`  | TIMESTAMP  | Auto-generated                        |
 
 ---
 
-## **4. Filtres globaux**
+### **5. `password_reset_requests`**
 
-Filtres situés en haut de la page, agissant sur tous les tableaux et le graphique :
+| Field          | Type       | Notes          |
+| -------------- | ---------- | -------------- |
+| `id`           | UUID / INT | Primary key    |
+| `user_id`      | UUID / INT | FK to `users`  |
+| `reset_token`  | VARCHAR    | Unique, secure |
+| `requested_at` | TIMESTAMP  |                |
+| `used_at`      | TIMESTAMP  | Nullable       |
 
-* **Maison** (liste déroulante)
-* **Mois** (sélecteur ou dropdown)
-* **Année** (sélecteur ou champ numérique)
-* **Type d’origine** (optionnel : Réservation, Maintenance, Manuel)
 
-Par défaut, l’année en cours et toutes les maisons sont sélectionnées.
 
----
 
-## **5. Ajout manuel d’une opération**
+### reservations`**
 
-Un bouton **“Ajouter une opération financière”** ouvre un formulaire avec les champs suivants :
-
-* **Type** : Entrée ou Sortie
-* **Maison concernée**
-* **Date de l’opération**
-* **Motif**
-* **Montant**
-* **Pièce jointe (facultatif)** : facture, photo ou preuve
-
-Une fois validée, l’opération est ajoutée dans les tableaux correspondants, avec mise à jour automatique du graphique.
-
----
-
-## **6. Visualisation graphique annuelle**
-
-En bas de la page, un **bar chart** permet une lecture claire des flux mensuels :
-
-* **Axe X** : les 12 mois de l’année
-* **Axe Y** : montant en euros
-* **Deux barres par mois** : une pour les **entrées**, une pour les **sorties**
-* **Légende claire** : couleur différente pour chaque type
-* **Filtrable par maison et année** (mêmes filtres que les tableaux)
+| Field            | Type       | Notes                           |
+| ---------------- | ---------- | ------------------------------- |
+| `id`             | UUID / INT | Primary key                     |
+| `nom`            | VARCHAR    | Guest name                      |
+| `telephone`      | VARCHAR    | Optional                        |
+| `email`          | VARCHAR    | Optional                        |
+| `checkin_date`   | DATE       | Required                        |
+| `checkout_date`  | DATE       | Required                        |
+| `montant_avance` | DECIMAL    | Advance payment                 |
+| `house_id`       | VARCHAR    | FK to `houses.id`               |
+| `created_at`     | TIMESTAMP  | Optional: auto-set on insertion |
 
 ---
 
-## **7. Fonctionnalités complémentaires**
+### **2. `houses`**
 
-* **Éditer une ligne** : permet de modifier les données saisies (manuelles uniquement)
-* **Supprimer une ligne** : message de confirmation avant suppression
-* **Origine cliquable** : lorsqu’une opération provient d’une autre page, possibilité d’ouvrir cette page (ex. voir la panne, voir la réservation)
-* **Étiquette d’origine** : visuelle (badge ou icône) pour distinguer les lignes générées automatiquement
-* **Export PDF / Excel** : export des opérations financières pour archivage ou comptabilité
-* **Résumé global** : un encadré en haut ou sur le côté peut afficher :
+| Field  | Type    | Notes                        |
+| ------ | ------- | ---------------------------- |
+| `id`   | VARCHAR | e.g. `maison-1`, primary key |
+| `name` | VARCHAR | e.g. `Mv1`, for display      |
 
-  * Total des entrées sur la période sélectionnée
-  * Total des sorties
-  * Solde actuel (entrées - sorties)
+---
 
+### **3.  `reservation_logs`** *
 
-
-// src/pages/FinancePage.tsx
---- 
-
-
-        {/* Filters */}
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-          
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-              Filtres
-            </CardTitle>
-          </CardHeader>
-         
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">
-                  Maison
-                </Label>
-                <Select
-                  value={filters.maison}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, maison: value }))
-                  }
-                >
-                  <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {houses.map((house) => (
-                      <SelectItem key={house.id} value={house.id}>
-                        {house.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">
-                  Mois
-                </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal border-slate-200 dark:border-slate-800 bg-transparent"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(filters.date, "MMMM yyyy", { locale: fr })}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={filters.date}
-                      onSelect={(date) =>
-                        date &&
-                        setFilters((prev) => ({
-                          ...prev,
-                          date,
-                          annee: date.getFullYear().toString(), // Automatically update year
-                        }))
-                      }
-                      locale={fr}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">
-                  Année
-                </Label>
-                <Select
-                  value={filters.annee}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, annee: value }))
-                  }
-                >
-                  <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 11 }, (_, i) => {
-                      const year = new Date().getFullYear() - 5 + i;
-                      return (
-                        <SelectItem key={year} value={year.toString()}>
-                          {year}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">
-                  Origine
-                </Label>
-                <Select
-                  value={filters.origine}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, origine: value }))
-                  }
-                >
-                  <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {originTypes.map((origin) => (
-                      <SelectItem key={origin.id} value={origin.id}>
-                        {origin.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+| Field            | Type       | Notes                                |
+| ---------------- | ---------- | ------------------------------------ |
+| `id`             | UUID / INT | Primary key                          |
+| `reservation_id` | UUID / INT | FK to `reservations`                 |
+| `action`         | VARCHAR    | e.g. `created`, `updated`, `deleted` |
+| `timestamp`      | TIMESTAMP  | When the action occurred             |
 
 
 
-in this coe I want to have all the filters to be displayed in one row 
-similar to the following  code  : 
 
-            {/* Filters in one horizontal row */}
+### **1. `houses`**
 
-            <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-lg text-xs whitespace-nowrap overflow-x-auto">
-              {/* Statut (switch + texte inline) */}
-              <div className="flex items-center gap-1">
-                <span className="text-slate-600 dark:text-slate-300">
-                  Non résolue
-                </span>
-                <Switch
-                  className="scale-75"
-                  checked={filters.statut === "resolue"}
-                  onCheckedChange={(checked) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      statut: checked ? "resolue" : "non-resolue",
-                    }))
-                  }
-                />
-                <span className="text-slate-600 dark:text-slate-300">
-                  Résolue
-                </span>
-              </div>
+| Field  | Type    | Notes                         |
+| ------ | ------- | ----------------------------- |
+| `id`   | VARCHAR | e.g., `maison-1`, Primary Key |
+| `name` | VARCHAR | e.g., `Mv1`, Display name     |
 
-              {/* Maison */}
-              <Select
-                value={filters.maison}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, maison: value }))
-                }
-              >
-                <SelectTrigger className="h-8 px-2 text-xs border-slate-200 dark:border-slate-800 w-[80px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {houses.map((house) => (
-                    <SelectItem key={house.id} value={house.id}>
-                      {house.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+---
 
-              {/* Date */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "h-8 px-2 text-xs border-slate-200 dark:border-slate-800 w-[110px] justify-start",
-                      !filters.dateDeclaration &&
-                        "text-slate-400 dark:text-slate-500"
-                    )}
-                  >
-                    <CalendarIcon className="mr-1 h-3 w-3" />
-                    {filters.dateDeclaration
-                      ? format(filters.dateDeclaration, "dd/MM/yy", {
-                          locale: fr,
-                        })
-                      : "Date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={filters.dateDeclaration}
-                    onSelect={(date) =>
-                      setFilters((prev) => ({ ...prev, dateDeclaration: date }))
-                    }
-                    locale={fr}
-                    autoFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+### **2. `checklist_categories`**
+
+| Field  | Type    | Notes                            |
+| ------ | ------- | -------------------------------- |
+| `id`   | INT     | Primary Key                      |
+| `name` | VARCHAR | e.g., `Cuisine`, `Salle de Bain` |
+
+---
+
+### **3. `checklist_items`**
+
+| Field              | Type       | Notes                                          |
+| ------------------ | ---------- | ---------------------------------------------- |
+| `id`               | UUID / INT | Primary Key                                    |
+| `house_id`         | VARCHAR    | FK to `houses.id`                              |
+| `step_number`      | INT        | Logical ordering of steps (e.g., 1, 2, 3...)   |
+| `category_id`      | INT        | FK to `checklist_categories.id`                |
+| `description`      | TEXT       | What needs to be done                          |
+| `product_required` | TEXT       | Products/tools to be used                      |
+| `type`             | VARCHAR    | Enum: `nettoyage`, `vérification`, `entretien` |
+
+---
+
+
+
+### **Existing Tables from Previous Page (still valid):**
+
+#### **1. `houses`**
+
+| Field  | Type    | Notes                        |
+| ------ | ------- | ---------------------------- |
+| `id`   | VARCHAR | Primary key, e.g. `maison-1` |
+| `name` | VARCHAR | Display name                 |
+
+#### **2. `checklist_categories`**
+
+| Field  | Type    | Notes                           |
+| ------ | ------- | ------------------------------- |
+| `id`   | INT     | Primary key                     |
+| `name` | VARCHAR | e.g., `Cuisine`, `Entrée`, etc. |
+
+#### **3. `checklist_items`**
+
+| Field              | Type       | Notes                                    |
+| ------------------ | ---------- | ---------------------------------------- |
+| `id`               | UUID / INT | Primary key                              |
+| `category_id`      | INT        | FK to `checklist_categories.id`          |
+| `description`      | TEXT       | Task description                         |
+| `product_required` | TEXT       | Optional products                        |
+| `type`             | VARCHAR    | `nettoyage`, `vérification`, `entretien` |
+
+---
+
+### **New Tables Required for Control / Status Tracking:**
+
+#### **4. `house_checklist_status`**
+
+Represents **which items** are completed for **which house**.
+
+| Field          | Type       | Notes                      |
+| -------------- | ---------- | -------------------------- |
+| `id`           | UUID / INT | Primary key                |
+| `house_id`     | VARCHAR    | FK to `houses.id`          |
+| `item_id`      | UUID / INT | FK to `checklist_items.id` |
+| `is_completed` | BOOLEAN    | Default: false             |
+| `completed_at` | TIMESTAMP  | Nullable                   |
+
+> One record per (house × checklist item)
+
+---
+
+#### **5. `house_category_status`** *(optional but efficient)*
+
+Tracks **category-level readiness** per house.
+
+| Field         | Type       | Notes                           |
+| ------------- | ---------- | ------------------------------- |
+| `id`          | UUID / INT | Primary key                     |
+| `house_id`    | VARCHAR    | FK to `houses.id`               |
+| `category_id` | INT        | FK to `checklist_categories.id` |
+| `is_ready`    | BOOLEAN    | True if all tasks are completed |
+| `ready_at`    | TIMESTAMP  | Optional                        |
+
+
+---
+
+### Euro **1. `houses`**
+
+| Field  | Type    | Notes                          |
+| ------ | ------- | ------------------------------ |
+| `id`   | VARCHAR | Primary key (`maison-1`, etc.) |
+| `name` | VARCHAR | Display name (`Mv1`, etc.)     |
+
+---
+
+### Euro **2. `reservations`**
+
+| Field           | Type       | Notes                     |
+| --------------- | ---------- | ------------------------- |
+| `id`            | UUID / INT | Primary key               |
+| `house_id`      | VARCHAR    | FK to `houses.id`         |
+| `guest_name`    | VARCHAR    | `nom` field               |
+| `phone`         | VARCHAR    | `telephone` field         |
+| `email`         | VARCHAR    | `email` field             |
+| `checkin_date`  | DATE       | `checkin` field           |
+| `checkout_date` | DATE       | `checkout` field          |
+| `advance_paid`  | DECIMAL    | `montantAvance`, optional |
+| `created_at`    | TIMESTAMP  | Auto-generated            |
+| `updated_at`    | TIMESTAMP  | Auto-updated on edit      |
+
+---
+
+### Euro **3. (Optional) `reservation_audit_log`**
+
+For tracking changes (edit/delete events).
+
+| Field            | Type       | Notes                           |
+| ---------------- | ---------- | ------------------------------- |
+| `id`             | UUID / INT | Primary key                     |
+| `reservation_id` | UUID / INT | FK to `reservations`            |
+| `action`         | VARCHAR    | `created`, `updated`, `deleted` |
+| `timestamp`      | TIMESTAMP  | When the event occurred         |
+| `user_id`        | UUID       | FK to users                     |
+
+---
+
+
+
+
+### **3. `checklist_items`**
+
+| Field              | Type       | Notes                                   |
+| ------------------ | ---------- | --------------------------------------- |
+| `id`               | UUID / INT | Primary key                             |
+| `category_id`      | INT        | FK to `checklist_categories.id`         |
+| `description`      | TEXT       | Task description                        |
+| `product_required` | TEXT       | Products used (optional)                |
+| `type`             | VARCHAR    | Enum: `nettoyage`, `vérification`, etc. |
+
+---
+
+###  **4. `house_checklist_status`**
+
+Tracks **completion of each task per house**.
+
+| Field          | Type       | Notes                                           |
+| -------------- | ---------- | ----------------------------------------------- |
+| `id`           | UUID / INT | Primary key                                     |
+| `house_id`     | VARCHAR    | FK to `houses.id`                               |
+| `item_id`      | UUID / INT | FK to `checklist_items.id`                      |
+| `is_completed` | BOOLEAN    | Whether the task is marked as done              |
+| `completed_at` | TIMESTAMP  | Optional                                        |
+| `updated_by`   | UUID       | FK to `users.id`, optional (for audit purposes) |
+
+
+
+---
+
+###  **5. `house_category_status`** 
+
+Stores **category-level readiness** per house.
+
+| Field         | Type       | Notes                                    |
+| ------------- | ---------- | ---------------------------------------- |
+| `id`          | UUID / INT | Primary key                              |
+| `house_id`    | VARCHAR    | FK to `houses.id`                        |
+| `category_id` | INT        | FK to `checklist_categories.id`          |
+| `is_ready`    | BOOLEAN    | True if all category tasks are completed |
+| `ready_at`    | TIMESTAMP  | Optional                                 |
+
+---
+
+
+| Field         | Type      | Notes                                       |
+| ------------- | --------- | ------------------------------------------- |
+| `id`          | UUID      | Primary key                                 |
+| `house_id`    | VARCHAR   | FK → `houses.id`                            |
+| `date`        | DATE      | The day in question                         |
+| `is_occupied` | BOOLEAN   | True if the house is booked that day        |
+| `source`      | VARCHAR   | e.g. `'reservation'`, `'maintenance_block'` |
+| `updated_at`  | TIMESTAMP | Optional                                    |
+
+
+
+
+#### `task_completion_logs`
+
+To track **who toggled what and when** (audit/history).
+
+| Field       | Type       | Notes                               |
+| ----------- | ---------- | ----------------------------------- |
+| `id`        | UUID / INT | Primary key                         |
+| `house_id`  | VARCHAR    | FK to `houses.id`                   |
+| `item_id`   | UUID / INT | FK to `checklist_items.id`          |
+| `user_id`   | UUID / INT | FK to `users.id`                    |
+| `completed` | BOOLEAN    | True = completed, False = unchecked |
+| `timestamp` | TIMESTAMP  | When the action happened            |
+
+
+
+
+### **1. `maintenance_issues`**
+
+| Field               | Type       | Notes                                           |
+| ------------------- | ---------- | ----------------------------------------------- |
+| `id`                | UUID / INT | Primary Key                                     |
+| `house_id`          | VARCHAR    | FK to `houses.id`                               |
+| `issue_type`        | VARCHAR    | Enum: `'electricite'`, `'plomberie'`, etc.      |
+| `reported_at`       | DATE       | `dateDeclaration`                               |
+| `assigned_to`       | VARCHAR    | `assigne`, plain text                           |
+| `comment`           | TEXT       | `commentaire`                                   |
+| `status`            | VARCHAR    | `'resolue'` or `'non-resolue'`                  |
+| `photo_issue_url`   | TEXT       | URL or file path of issue photo (optional)      |
+| `photo_invoice_url` | TEXT       | URL or file path of facture photo (if resolved) |
+| `labor_cost`        | DECIMAL    | `prixMainOeuvre` (optional)                     |
+| `created_at`        | TIMESTAMP  | Default `now()`                                 |
+| `updated_at`        | TIMESTAMP  | Auto-updated on edit                            |
+
+---
+
+### **2. `maintenance_types`** *(optional lookup table)*
+
+| Field   | Type    | Notes                                    |
+| ------- | ------- | ---------------------------------------- |
+| `id`    | VARCHAR | Primary key: e.g. `electricite`          |
+| `label` | VARCHAR | Human-readable label: e.g. `Électricité` |
+
+---
+
+### **3. `maintenance_status_log`** *(optional audit log for status updates)*
+
+| Field        | Type      | Notes                         |
+| ------------ | --------- | ----------------------------- |
+| `id`         | UUID      | Primary key                   |
+| `issue_id`   | UUID      | FK to `maintenance_issues.id` |
+| `previous`   | VARCHAR   | Status before update          |
+| `new`        | VARCHAR   | Status after update           |
+| `changed_at` | TIMESTAMP | Timestamp of the update       |
+| `changed_by` | UUID      | FK to `users.id` (nullable)   |
+---
+
+Thanks — with this final component in place, we now have a **complete picture of the database structure** needed to support the finance-related features of your app.
+
+Here is a **structured list of DB elements** extracted from all the logic:
+
+---
+
+##  Table: `financial_operations`
+
+Stores individual income/expense transactions per house.
+
+| Column         | Type            | Description                                               |
+| -------------- | --------------- | --------------------------------------------------------- |
+| `id`           | UUID / SERIAL   | Primary key                                               |
+| `date`         | DATE            | Date of transaction                                       |
+| `house_id`     | VARCHAR         | FK → `houses(id)`                                         |
+| `type`         | ENUM            | `'entree'` or `'sortie'`                                  |
+| `motif`        | TEXT            | Description of the transaction                            |
+| `montant`      | DECIMAL(10, 2)  | Transaction amount in euros                               |
+| `origine`      | ENUM            | `'reservation'`, `'maintenance'`, `'checkin'`, `'manuel'` |
+| `piece_jointe` | TEXT (nullable) | Filename or URL of optional receipt or document           |
+| `editable`     | BOOLEAN         | Whether this transaction can be edited or deleted         |
+| `created_at`   | TIMESTAMP       | Auto timestamp                                            |
+| `updated_at`   | TIMESTAMP       | Updated on edit                                           |
+
+---
+
+
+
+##  Enum: `operation_type`
+
+Values: `'entree'`, `'sortie'`
+
+##  Enum: `operation_origin`
+
+Values: `'reservation'`, `'maintenance'`, `'checkin'`, `'manuel'`
+
+
+---
+
+## `file_attachments`
+
+If you decide to manage files in a separate table (
+
+| Column         | Type      | Description                         |
+| -------------- | --------- | ----------------------------------- |
+| `id`           | UUID      | Primary key                         |
+| `operation_id` | UUID      | FK → `financial_operations(id)`     |
+| `filename`     | TEXT      | Name or path of the file            |
+| `mime_type`    | TEXT      | e.g. `image/png`, `application/pdf` |
+| `uploaded_at`  | TIMESTAMP | Upload time                         |
+
+
+
+
+I’m building a full-stack app with React + Vite on the frontend and FastAPI + SQLAlchemy + SQLite on the backend.
+
+I’ve already defined a complete schema for users, reservations, houses, maintenance, financial operations, and checklists.
+
+I want to start building the FastAPI backend, including SQLAlchemy models, routers, and endpoints.
+
+Please use the following schema as the starting point for all further work (models, endpoints, etc.):
+
+(paste your full schema here)
+
+Let’s begin with setting up the models and a clean project layout. After that, I’ll tell you which endpoints I want.
