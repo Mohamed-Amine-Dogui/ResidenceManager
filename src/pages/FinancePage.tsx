@@ -1,7 +1,7 @@
 // src/pages/FinancePage.tsx
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -35,7 +35,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -57,7 +56,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Toaster, toast } from "sonner";
@@ -71,16 +69,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { ChartTooltip } from "@/components/ui/chart";
+import AddFinanceTransaction from "@/components/AddFinanceTransaction";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const houses = [
   { id: "all", name: "Toutes" },
@@ -125,7 +121,6 @@ export default function FinancePage() {
   const [operationToDelete, setOperationToDelete] = useState<string | null>(
     null
   );
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{
     src: string;
@@ -223,6 +218,8 @@ export default function FinancePage() {
     );
   });
 
+  const [addFormVisible, setAddFormVisible] = useState(false);
+
   const entrees = filteredOperations.filter((op) => op.type === "entree");
   const sorties = filteredOperations.filter((op) => op.type === "sortie");
 
@@ -293,7 +290,6 @@ export default function FinancePage() {
     }
 
     resetForm();
-    setAddDialogOpen(false);
   };
 
   const resetForm = () => {
@@ -325,7 +321,6 @@ export default function FinancePage() {
       pieceJointe: null,
     });
     setEditingOperation(operation.id);
-    setAddDialogOpen(true);
   };
 
   const handleDelete = (id: string) => {
@@ -386,6 +381,21 @@ export default function FinancePage() {
       </Badge>
     );
   };
+
+  const memoizedSetFormData = useCallback(
+    (updater: React.SetStateAction<typeof formData>) => {
+      setFormData(updater);
+    },
+    []
+  );
+
+  const memoizedFormData = useMemo(() => formData, [formData]);
+
+  const memoizedCloseDialog = useCallback(() => {
+    setAddFormVisible(false);
+    setEditingOperation(null);
+    resetForm();
+  }, []);
 
   const OperationTable = ({
     data,
@@ -520,177 +530,18 @@ export default function FinancePage() {
           </Table>
         </div>
         <div className="flex justify-end space-x-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200">
-                <Plus className="mr-2 h-4 w-4" />
-                Ajouter une opération
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-slate-900 dark:text-slate-50">
-                  {editingOperation
-                    ? "Modifier l'opération"
-                    : "Ajouter une opération financière"}
-                </DialogTitle>
-                <DialogDescription className="text-slate-600 dark:text-slate-400">
-                  {editingOperation
-                    ? "Modifiez les détails de l'opération"
-                    : "Ajoutez une nouvelle opération financière manuelle"}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label className="text-slate-700 dark:text-slate-300">
-                      Type *
-                    </Label>
-                    <Select
-                      value={formData.type}
-                      onValueChange={(value: "entree" | "sortie") =>
-                        setFormData((prev) => ({ ...prev, type: value }))
-                      }
-                    >
-                      <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="entree">Entrée</SelectItem>
-                        <SelectItem value="sortie">Sortie</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-slate-700 dark:text-slate-300">
-                      Maison *
-                    </Label>
-                    <Select
-                      value={formData.maison}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, maison: value }))
-                      }
-                    >
-                      <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                        <SelectValue placeholder="Choisir une maison" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {houses.slice(1).map((house) => (
-                          <SelectItem key={house.id} value={house.id}>
-                            {house.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+          <Button
+            onClick={() => {
+              setEditingOperation(null);
+              resetForm();
+              setAddFormVisible(true);
+            }}
+            className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Ajouter une opération
+          </Button>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label className="text-slate-700 dark:text-slate-300">
-                      Date *
-                    </Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start text-left font-normal border-slate-200 dark:border-slate-800 bg-transparent"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {format(formData.date, "PPP", { locale: fr })}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={formData.date}
-                          onSelect={(date) =>
-                            date && setFormData((prev) => ({ ...prev, date }))
-                          }
-                          locale={fr}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-slate-700 dark:text-slate-300">
-                      Montant (€) *
-                    </Label>
-                    <Input
-                      type="number"
-                      value={formData.montant}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          montant: e.target.value,
-                        }))
-                      }
-                      className="border-slate-200 dark:border-slate-800"
-                      placeholder="0.00"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-slate-700 dark:text-slate-300">
-                    Motif *
-                  </Label>
-                  <Textarea
-                    value={formData.motif}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        motif: e.target.value,
-                      }))
-                    }
-                    className="border-slate-200 dark:border-slate-800"
-                    placeholder="Description de l'opération"
-                    rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-slate-700 dark:text-slate-300">
-                    Pièce jointe
-                  </Label>
-                  <Input
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        pieceJointe: e.target.files?.[0] || null,
-                      }))
-                    }
-                    className="border-slate-200 dark:border-slate-800"
-                  />
-                </div>
-
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setAddDialogOpen(false);
-                      setEditingOperation(null);
-                      resetForm();
-                    }}
-                    className="border-slate-200 dark:border-slate-800"
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
-                  >
-                    {editingOperation ? "Modifier" : "Ajouter"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
           <Button
             variant="outline"
             className="border-slate-200 dark:border-slate-800 bg-transparent"
@@ -1063,6 +914,28 @@ export default function FinancePage() {
 
         <Toaster />
       </div>
+
+      <Sheet open={addFormVisible} onOpenChange={setAddFormVisible}>
+        <SheetContent side="right" className="w-[400px]">
+          <SheetHeader>
+            <SheetTitle>
+              {editingOperation ? "Modifier l'opération" : "Nouvelle opération"}
+            </SheetTitle>
+          </SheetHeader>
+
+          <AddFinanceTransaction
+            formData={memoizedFormData}
+            setFormData={memoizedSetFormData}
+            handleSubmit={(e) => {
+              handleSubmit(e);
+              setAddFormVisible(false);
+            }}
+            editingOperation={editingOperation}
+            closeDialog={memoizedCloseDialog}
+            houses={houses}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

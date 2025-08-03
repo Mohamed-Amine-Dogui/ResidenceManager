@@ -269,7 +269,7 @@ npx shadcn@latest add accordion
 
 npx shadcn@latest add tabs
 npx shadcn@latest add badge
-
+npx shadcn@latest add sheet
 
 ```
 
