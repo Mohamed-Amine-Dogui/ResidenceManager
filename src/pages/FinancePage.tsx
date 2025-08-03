@@ -11,10 +11,11 @@ import {
   Plus,
   TrendingUp,
   TrendingDown,
-  DollarSign,
+  Euro,
   Camera,
   Download,
   CircleX,
+  Landmark,
 } from "lucide-react";
 import {
   BarChart,
@@ -77,6 +78,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const houses = [
   { id: "all", name: "Toutes" },
@@ -397,6 +401,70 @@ export default function FinancePage() {
     resetForm();
   }, []);
 
+  const getTimestamp = () => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+      now.getDate()
+    )}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
+  };
+
+  const exportToCSV = () => {
+    const headers = ["Date", "Maison", "Type", "Motif", "Montant", "Origine"];
+
+    const rows = filteredOperations.map((op) => [
+      format(new Date(op.date), "yyyy-MM-dd"),
+      houses.find((h) => h.id === op.maison)?.name || "",
+      op.type === "entree" ? "Entrée" : "Sortie",
+      op.motif,
+      `${op.montant}€`,
+      originTypes.find((o) => o.id === op.origine)?.name || "",
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", `operations_${getTimestamp()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+
+    const tableColumn = [
+      "Date",
+      "Maison",
+      "Type",
+      "Motif",
+      "Montant",
+      "Origine",
+    ];
+
+    const tableRows = filteredOperations.map((op) => [
+      format(new Date(op.date), "yyyy-MM-dd"),
+      houses.find((h) => h.id === op.maison)?.name || "",
+      op.type === "entree" ? "Entrée" : "Sortie",
+      op.motif,
+      `${op.montant}€`,
+      originTypes.find((o) => o.id === op.origine)?.name || "",
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      styles: { fontSize: 8 },
+      theme: "grid",
+    });
+
+    doc.save(`operations_${getTimestamp()}.pdf`);
+  };
+
   const OperationTable = ({
     data,
     title,
@@ -545,6 +613,7 @@ export default function FinancePage() {
           <Button
             variant="outline"
             className="border-slate-200 dark:border-slate-800 bg-transparent"
+            onClick={exportToPDF}
           >
             <Download className="text-xs mr-2 h-4 w-4" />
             PDF
@@ -552,6 +621,7 @@ export default function FinancePage() {
           <Button
             variant="outline"
             className="border-slate-200 dark:border-slate-800 bg-transparent"
+            onClick={exportToCSV}
           >
             <Download className="text-xs mr-2 h-4 w-4" />
             Excel
@@ -567,7 +637,7 @@ export default function FinancePage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <DollarSign className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+            <Landmark className="h-6 w-6 text-slate-600 dark:text-slate-400" />
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
               Suivi Financier
             </h1>
@@ -691,66 +761,6 @@ export default function FinancePage() {
           </div>
         </CardContent>
 
-        {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Total des entrées
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-lime-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-lime-400">
-                {totalEntrees.toLocaleString("fr-FR")}€
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {entrees.length} opération(s)
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Total des sorties
-              </CardTitle>
-              <TrendingDown className="h-4 w-4 text-cyan-300" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-cyan-300">
-                {totalSorties.toLocaleString("fr-FR")}€
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {sorties.length} opération(s)
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Solde net
-              </CardTitle>
-              <DollarSign
-                className={`h-4 w-4 ${
-                  soldeNet >= 0 ? "text-lime-400" : "text-cyan-300"
-                }`}
-              />
-            </CardHeader>
-            <CardContent>
-              <div
-                className={`text-2xl font-bold ${
-                  soldeNet >= 0 ? "text-lime-400" : "text-cyan-300"
-                }`}
-              >
-                {soldeNet.toLocaleString("fr-FR")}€
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {soldeNet >= 0 ? "Bénéfice" : "Déficit"}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Tables */}
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="grid w-full grid-cols-3 bg-slate-100 dark:bg-slate-800">
@@ -786,6 +796,67 @@ export default function FinancePage() {
             <OperationTable data={sorties} title="Sorties d'argent" />
           </TabsContent>
         </Tabs>
+
+        {/* Summary Cards */}
+        <div className="grid gap-4 grid-cols-3">
+            
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  Total des entrées
+                </CardTitle>
+                <TrendingUp className="h-4 w-4 text-lime-400" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-lime-400">
+                  {totalEntrees.toLocaleString("fr-FR")}€
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {entrees.length} opération(s)
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  Total des sorties
+                </CardTitle>
+                <TrendingDown className="h-4 w-4 text-cyan-300" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-cyan-300">
+                  {totalSorties.toLocaleString("fr-FR")}€
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {sorties.length} opération(s)
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  Solde total net
+                </CardTitle>
+                <Euro
+                  className={`h-4 w-4 ${
+                    soldeNet >= 0 ? "text-lime-400" : "text-cyan-300"
+                  }`}
+                />
+              </CardHeader>
+              <CardContent>
+                <div
+                  className={`text-2xl font-bold ${
+                    soldeNet >= 0 ? "text-lime-400" : "text-cyan-300"
+                  }`}
+                >
+                  {soldeNet.toLocaleString("fr-FR")}€
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {soldeNet >= 0 ? "Bénéfice" : "Déficit"}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
         {/* Chart */}
         <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">

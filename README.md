@@ -250,6 +250,9 @@ npm install sonner
 npm install react-router-dom
 npm install date-fns
 npm install recharts
+
+npm install jspdf jspdf-autotable
+
 npx shadcn@latest add calendar
 npx shadcn@latest add switch
 npx shadcn@latest add tooltip
