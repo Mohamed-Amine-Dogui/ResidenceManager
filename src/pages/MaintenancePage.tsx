@@ -13,6 +13,7 @@ import {
   X,
   Notebook,
   CircleX,
+  Camera,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -802,7 +803,7 @@ export default function MaintenancePage() {
                             }}
                             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer text-lg"
                           >
-                            📷
+                            <Camera className="h-4 w-4" />
                           </button>
                         ) : (
                           "-"
@@ -828,7 +829,7 @@ export default function MaintenancePage() {
                                 }}
                                 className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer text-lg"
                               >
-                                📷
+                                <Camera className="h-4 w-4" />
                               </button>
                             ) : (
                               "-"

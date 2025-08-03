@@ -1,4 +1,4 @@
-"use client";
+// src/pages/FinancePage.tsx
 
 import type React from "react";
 import { useState, useEffect } from "react";
@@ -12,7 +12,7 @@ import {
   TrendingUp,
   TrendingDown,
   DollarSign,
-  FileText,
+  Camera,
   Download,
   CircleX,
 } from "lucide-react";
@@ -496,17 +496,19 @@ export default function FinancePage() {
                   <TableCell className="text-slate-600 dark:text-slate-400">
                     {operation.pieceJointe ? (
                       <button
-                        onClick={() =>
-                          handleImageClick(
-                            typeof operation.pieceJointe === "string"
-                              ? operation.pieceJointe
-                              : URL.createObjectURL(operation.pieceJointe),
-                            "Pièce jointe"
-                          )
-                        }
-                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                        onClick={() => {
+                          const imageUrl =
+                            operation.pieceJointe instanceof File
+                              ? URL.createObjectURL(operation.pieceJointe)
+                              : operation.pieceJointe;
+
+                          if (typeof imageUrl === "string") {
+                            handleImageClick(imageUrl, "Photo de la panne");
+                          }
+                        }}
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer text-lg"
                       >
-                        <FileText className="h-4 w-4" />
+                        <Camera className="h-4 w-4" />
                       </button>
                     ) : (
                       "-"

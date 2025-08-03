@@ -58,8 +58,6 @@ interface Reservation {
   checkin: string;
   checkout: string;
   montantAvance: number;
-  montantRestant: number;
-  montantTotal: number;
   maison: string;
 }
 
@@ -88,8 +86,6 @@ const initialReservations: Reservation[] = [
     checkin: "2025-07-15",
     checkout: "2025-07-20",
     montantAvance: 200,
-    montantRestant: 300,
-    montantTotal: 500,
     maison: "maison-1",
   },
   {
@@ -100,8 +96,6 @@ const initialReservations: Reservation[] = [
     checkin: "2025-06-25",
     checkout: "2025-07-02",
     montantAvance: 150,
-    montantRestant: 350,
-    montantTotal: 500,
     maison: "maison-1",
   },
 ];
@@ -132,8 +126,6 @@ export default function ReservationPage() {
     checkin: undefined as Date | undefined,
     checkout: undefined as Date | undefined,
     montantAvance: "",
-    montantRestant: "",
-    montantTotal: "",
   });
 
   const filteredReservations = reservations.filter(
@@ -196,7 +188,6 @@ export default function ReservationPage() {
 
     if (
       !formData.nom ||
-      !formData.montantTotal ||
       !formData.checkin ||
       !formData.checkout
     ) {
@@ -221,8 +212,6 @@ export default function ReservationPage() {
       checkin: format(formData.checkin, "yyyy-MM-dd"),
       checkout: format(formData.checkout, "yyyy-MM-dd"),
       montantAvance: Number.parseFloat(formData.montantAvance) || 0,
-      montantRestant: Number.parseFloat(formData.montantRestant) || 0,
-      montantTotal: Number.parseFloat(formData.montantTotal),
       maison: selectedHouse,
     };
 
@@ -249,8 +238,6 @@ export default function ReservationPage() {
       checkin: undefined,
       checkout: undefined,
       montantAvance: "",
-      montantRestant: "",
-      montantTotal: "",
     });
   };
 
@@ -262,8 +249,6 @@ export default function ReservationPage() {
       checkin: parseISO(reservation.checkin),
       checkout: parseISO(reservation.checkout),
       montantAvance: reservation.montantAvance.toString(),
-      montantRestant: reservation.montantRestant.toString(),
-      montantTotal: reservation.montantTotal.toString(),
     });
     setEditingReservation(reservation.id);
   };
@@ -506,7 +491,7 @@ export default function ReservationPage() {
                           setFormData((prev) => ({ ...prev, checkin: date }))
                         }
                         locale={fr}
-                        initialFocus
+                        autoFocus
                       />
                     </PopoverContent>
                   </Popover>
@@ -564,47 +549,6 @@ export default function ReservationPage() {
                     className="border-slate-200 dark:border-slate-800"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="montantRestant"
-                    className="text-slate-700 dark:text-slate-300"
-                  >
-                    Montant restant
-                  </Label>
-                  <Input
-                    id="montantRestant"
-                    type="number"
-                    value={formData.montantRestant}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        montantRestant: e.target.value,
-                      }))
-                    }
-                    className="border-slate-200 dark:border-slate-800"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="montantTotal"
-                    className="text-slate-700 dark:text-slate-300"
-                  >
-                    Montant total *
-                  </Label>
-                  <Input
-                    id="montantTotal"
-                    type="number"
-                    value={formData.montantTotal}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        montantTotal: e.target.value,
-                      }))
-                    }
-                    className="border-slate-200 dark:border-slate-800"
-                    required
-                  />
-                </div>
               </div>
 
               <div className="flex justify-center space-x-2 pt-4">
@@ -628,8 +572,6 @@ export default function ReservationPage() {
                         checkin: undefined,
                         checkout: undefined,
                         montantAvance: "",
-                        montantRestant: "",
-                        montantTotal: "",
                       });
                     }}
                     className="border-slate-200 dark:border-slate-800"
@@ -679,12 +621,7 @@ export default function ReservationPage() {
                     <TableHead className="text-slate-700 dark:text-slate-300">
                       Avance
                     </TableHead>
-                    <TableHead className="text-slate-700 dark:text-slate-300">
-                      Restant
-                    </TableHead>
-                    <TableHead className="text-slate-700 dark:text-slate-300">
-                      Total
-                    </TableHead>
+
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -735,12 +672,7 @@ export default function ReservationPage() {
                       <TableCell className="text-slate-600 dark:text-slate-400">
                         {reservation.montantAvance}€
                       </TableCell>
-                      <TableCell className="text-slate-600 dark:text-slate-400">
-                        {reservation.montantRestant}€
-                      </TableCell>
-                      <TableCell className="font-medium text-slate-900 dark:text-slate-50">
-                        {reservation.montantTotal}€
-                      </TableCell>
+
                     </TableRow>
                   ))}
                 </TableBody>
