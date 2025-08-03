@@ -91,10 +91,12 @@ export default function HomePage() {
   ];
 
   // Pie chart data for house occupancy
-  const occupancyData = [
-    { name: "Occupées", value: 9, fill: "#475569" },
-    { name: "Libres", value: 4, fill: "#94a3b8" },
-  ];
+const occupancyData = [
+  { name: "Occupées", value: 9, fill: "#1d4ed8" }, // blue-700
+  { name: "Libres", value: 4, fill: "#7dd3fc" },   // sky-300
+];
+
+
 
   // Area chart data for monthly revenue
   const revenueData = [
@@ -149,7 +151,7 @@ export default function HomePage() {
                 mode="single"
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
-                initialFocus
+                autoFocus
                 locale={fr}
                 className="bg-white dark:bg-slate-950"
               />
@@ -235,13 +237,13 @@ export default function HomePage() {
               </div>
               <div className="mt-4 flex justify-center space-x-6">
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-slate-600"></div>
+                  <div className="w-3 h-3 rounded-full bg-blue-700"></div>
                   <span className="text-sm text-slate-600 dark:text-slate-400">
                     Occupées (9)
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-slate-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-sky-300"></div>
                   <span className="text-sm text-slate-600 dark:text-slate-400">
                     Libres (4)
                   </span>
@@ -286,12 +288,12 @@ export default function HomePage() {
                       >
                         <stop
                           offset="5%"
-                          stopColor="#475569"
+                          stopColor="#1d4ed8"
                           stopOpacity={0.3}
                         />
                         <stop
                           offset="95%"
-                          stopColor="#475569"
+                          stopColor="#1d4ed8"
                           stopOpacity={0.05}
                         />
                       </linearGradient>
