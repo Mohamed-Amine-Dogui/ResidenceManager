@@ -131,3 +131,201 @@ En bas de la page, un **bar chart** permet une lecture claire des flux mensuels 
 
 
 // src/pages/FinancePage.tsx
+--- 
+
+
+        {/* Filters */}
+        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+          
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+              Filtres
+            </CardTitle>
+          </CardHeader>
+         
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">
+                  Maison
+                </Label>
+                <Select
+                  value={filters.maison}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, maison: value }))
+                  }
+                >
+                  <SelectTrigger className="border-slate-200 dark:border-slate-800">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {houses.map((house) => (
+                      <SelectItem key={house.id} value={house.id}>
+                        {house.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">
+                  Mois
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal border-slate-200 dark:border-slate-800 bg-transparent"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(filters.date, "MMMM yyyy", { locale: fr })}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={filters.date}
+                      onSelect={(date) =>
+                        date &&
+                        setFilters((prev) => ({
+                          ...prev,
+                          date,
+                          annee: date.getFullYear().toString(), // Automatically update year
+                        }))
+                      }
+                      locale={fr}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">
+                  Année
+                </Label>
+                <Select
+                  value={filters.annee}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, annee: value }))
+                  }
+                >
+                  <SelectTrigger className="border-slate-200 dark:border-slate-800">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 11 }, (_, i) => {
+                      const year = new Date().getFullYear() - 5 + i;
+                      return (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-700 dark:text-slate-300">
+                  Origine
+                </Label>
+                <Select
+                  value={filters.origine}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, origine: value }))
+                  }
+                >
+                  <SelectTrigger className="border-slate-200 dark:border-slate-800">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {originTypes.map((origin) => (
+                      <SelectItem key={origin.id} value={origin.id}>
+                        {origin.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
+
+in this coe I want to have all the filters to be displayed in one row 
+similar to the following  code  : 
+
+            {/* Filters in one horizontal row */}
+
+            <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-lg text-xs whitespace-nowrap overflow-x-auto">
+              {/* Statut (switch + texte inline) */}
+              <div className="flex items-center gap-1">
+                <span className="text-slate-600 dark:text-slate-300">
+                  Non résolue
+                </span>
+                <Switch
+                  className="scale-75"
+                  checked={filters.statut === "resolue"}
+                  onCheckedChange={(checked) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      statut: checked ? "resolue" : "non-resolue",
+                    }))
+                  }
+                />
+                <span className="text-slate-600 dark:text-slate-300">
+                  Résolue
+                </span>
+              </div>
+
+              {/* Maison */}
+              <Select
+                value={filters.maison}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, maison: value }))
+                }
+              >
+                <SelectTrigger className="h-8 px-2 text-xs border-slate-200 dark:border-slate-800 w-[80px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {houses.map((house) => (
+                    <SelectItem key={house.id} value={house.id}>
+                      {house.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Date */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "h-8 px-2 text-xs border-slate-200 dark:border-slate-800 w-[110px] justify-start",
+                      !filters.dateDeclaration &&
+                        "text-slate-400 dark:text-slate-500"
+                    )}
+                  >
+                    <CalendarIcon className="mr-1 h-3 w-3" />
+                    {filters.dateDeclaration
+                      ? format(filters.dateDeclaration, "dd/MM/yy", {
+                          locale: fr,
+                        })
+                      : "Date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={filters.dateDeclaration}
+                    onSelect={(date) =>
+                      setFilters((prev) => ({ ...prev, dateDeclaration: date }))
+                    }
+                    locale={fr}
+                    autoFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>

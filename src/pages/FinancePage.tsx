@@ -135,7 +135,7 @@ export default function FinancePage() {
   // Filters
   const [filters, setFilters] = useState({
     maison: "all",
-    date: new Date(), // Change from mois to date
+    date: new Date(),
     annee: new Date().getFullYear().toString(),
     origine: "all",
   });
@@ -159,7 +159,7 @@ export default function FinancePage() {
         maison: "maison-1",
         type: "entree",
         motif: "Avance réservation - Jean Dupont",
-        montant: 200,
+        montant: 700,
         origine: "reservation",
         editable: false,
       },
@@ -169,7 +169,7 @@ export default function FinancePage() {
         maison: "maison-1",
         type: "entree",
         motif: "Solde réservation - Jean Dupont",
-        montant: 300,
+        montant: 900,
         origine: "checkin",
         editable: false,
       },
@@ -199,7 +199,7 @@ export default function FinancePage() {
         maison: "maison-3",
         type: "sortie",
         motif: "Salaire employé - Janvier",
-        montant: 1200,
+        montant: 600,
         origine: "manuel",
         editable: true,
       },
@@ -236,7 +236,7 @@ export default function FinancePage() {
       const opDate = new Date(op.date);
       return (
         opDate.getMonth() === index &&
-        opDate.getFullYear().toString() === filters.annee && // Use the year from the filter
+        opDate.getFullYear().toString() === filters.annee &&
         (filters.maison === "all" || op.maison === filters.maison)
       );
     });
@@ -366,7 +366,7 @@ export default function FinancePage() {
   const getOriginBadge = (origine: string) => {
     const variants = {
       reservation:
-        "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200",
+        " bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200 ",
       maintenance:
         "bg-teal-200 text-teal-900 dark:bg-teal-800 dark:text-teal-100",
       checkin: "bg-teal-300 text-teal-900 dark:bg-teal-700 dark:text-teal-100",
@@ -723,17 +723,12 @@ export default function FinancePage() {
           </div>
         </div>
 
-        {/* Filters */}
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-              Filtres
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">
+        <CardContent>
+          <div className="w-full flex justify-center">
+            <div className="flex items-end gap-3 px-4 py-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 rounded-lg text-xs whitespace-nowrap">
+              {/* Maison */}
+              <div className="flex flex-col space-y-1">
+                <Label className="text-slate-700 dark:text-slate-300 text-xs">
                   Maison
                 </Label>
                 <Select
@@ -742,8 +737,8 @@ export default function FinancePage() {
                     setFilters((prev) => ({ ...prev, maison: value }))
                   }
                 >
-                  <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                    <SelectValue />
+                  <SelectTrigger className="h-8 px-2 text-xs border-slate-200 dark:border-slate-800 w-[90px]">
+                    <SelectValue placeholder="Maison" />
                   </SelectTrigger>
                   <SelectContent>
                     {houses.map((house) => (
@@ -754,18 +749,22 @@ export default function FinancePage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">
+
+              {/* Mois */}
+              <div className="flex flex-col space-y-1">
+                <Label className="text-slate-700 dark:text-slate-300 text-xs">
                   Mois
                 </Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left font-normal border-slate-200 dark:border-slate-800 bg-transparent"
+                      className="h-8 px-2 text-xs border-slate-200 dark:border-slate-800 w-[110px] justify-start"
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(filters.date, "MMMM yyyy", { locale: fr })}
+                      <CalendarIcon className="mr-1 h-3 w-3" />
+                      {filters.date
+                        ? format(filters.date, "MMM yyyy", { locale: fr })
+                        : "Mois"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -777,17 +776,19 @@ export default function FinancePage() {
                         setFilters((prev) => ({
                           ...prev,
                           date,
-                          annee: date.getFullYear().toString(), // Automatically update year
+                          annee: date.getFullYear().toString(),
                         }))
                       }
                       locale={fr}
-                      initialFocus
+                      autoFocus
                     />
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">
+
+              {/* Année */}
+              <div className="flex flex-col space-y-1">
+                <Label className="text-slate-700 dark:text-slate-300 text-xs">
                   Année
                 </Label>
                 <Select
@@ -796,8 +797,8 @@ export default function FinancePage() {
                     setFilters((prev) => ({ ...prev, annee: value }))
                   }
                 >
-                  <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                    <SelectValue />
+                  <SelectTrigger className="h-8 px-2 text-xs border-slate-200 dark:border-slate-800 w-[80px]">
+                    <SelectValue placeholder="Année" />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.from({ length: 11 }, (_, i) => {
@@ -811,8 +812,10 @@ export default function FinancePage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label className="text-slate-700 dark:text-slate-300">
+
+              {/* Origine */}
+              <div className="flex flex-col space-y-1">
+                <Label className="text-slate-700 dark:text-slate-300 text-xs">
                   Origine
                 </Label>
                 <Select
@@ -821,8 +824,8 @@ export default function FinancePage() {
                     setFilters((prev) => ({ ...prev, origine: value }))
                   }
                 >
-                  <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                    <SelectValue />
+                  <SelectTrigger className="h-8 px-2 text-xs border-slate-200 dark:border-slate-800 w-[100px]">
+                    <SelectValue placeholder="Origine" />
                   </SelectTrigger>
                   <SelectContent>
                     {originTypes.map((origin) => (
@@ -834,8 +837,8 @@ export default function FinancePage() {
                 </Select>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-3">
