@@ -210,7 +210,65 @@
 * `uploaded_at`: `datetime`
 
 
-
-
 ## ERD (Entity Relationship Diagram)
+
+
+### **Users & Authentication**
+
+* `users(id, email, password_hash, role, created_at, last_login)`
+* `auth_providers(id, provider_name, description)`
+* `user_providers(id, user_id, provider_id, external_id, linked_at)`
+* `login_attempts(id, user_id?, email, success, provider, ip_address?, timestamp)`
+* `password_reset_requests(id, user_id, reset_token, requested_at, used_at?)`
+
+---
+
+### **Reservations System**
+
+* `houses(id, name)`
+* `reservations(id, house_id, guest_name, phone?, email?, checkin_date, checkout_date, advance_paid, created_at, updated_at)`
+* `reservation_audit_log(id, reservation_id, action, timestamp, user_id)`
+
+---
+
+### **Checklists**
+
+* `checklist_categories(id, name)`
+* `checklist_items(id, house_id, step_number, category_id, description, product_required, type)`
+* `house_checklist_status(id, house_id, item_id, is_completed, completed_at?, updated_by?)`
+* `house_category_status(id, house_id, category_id, is_ready, ready_at?)`
+* `task_completion_logs(id, house_id, item_id, user_id, completed, timestamp)`
+
+---
+
+### **House Occupancy & Availability**
+
+* `house_daily_occupancy(id, house_id, date, is_occupied, source, updated_at?)`
+
+---
+
+### **Maintenance Tracking**
+
+* `maintenance_issues(id, house_id, issue_type, reported_at, assigned_to, comment, status, photo_issue_url?, photo_invoice_url?, labor_cost?, created_at, updated_at)`
+* `maintenance_types(id, label)`
+* `maintenance_status_log(id, issue_id, previous, new, changed_at, changed_by?)`
+
+---
+
+### **Financial Records**
+
+* `financial_operations(id, date, house_id, type, motif, montant, origine, piece_jointe?, editable, created_at, updated_at)`
+* `file_attachments(id, operation_id, filename, mime_type, uploaded_at)`
+
+---
+
+### **Enum Notes** (used in multiple places)
+
+* `operation_type`: `'entree'`, `'sortie'`
+* `operation_origin`: `'reservation'`, `'maintenance'`, `'checkin'`, `'manuel'`
+* `checklist_type`: `'nettoyage'`, `'vérification'`, `'entretien'`
+* `issue_type`: `'electricite'`, `'plomberie'`, etc.
+
+---
+
 
