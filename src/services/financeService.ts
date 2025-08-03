@@ -88,5 +88,89 @@ export const financeService = {
       month,
       revenue
     }));
+  },
+
+  // Auto-generate transaction from reservation (advance payment)
+  createReservationTransaction: async (reservation: {
+    id: string;
+    nom: string;
+    checkin: string;
+    montantAvance: number;
+    maison: string;
+  }): Promise<FinancialOperation> => {
+    const transaction: CreateFinancialOperation = {
+      date: reservation.checkin,
+      maison: reservation.maison,
+      type: 'entree',
+      motif: `Avance réservation - ${reservation.nom}`,
+      montant: reservation.montantAvance,
+      origine: 'reservation',
+      editable: false
+    };
+
+    return financeService.createFinancialOperation(transaction);
+  },
+
+  // Auto-generate transaction from check-in (full accommodation payment)
+  createCheckinTransaction: async (checkin: {
+    id: string;
+    nom: string;
+    dateArrivee: string;
+    montantTotal: number;
+    maison: string;
+  }): Promise<FinancialOperation> => {
+    const transaction: CreateFinancialOperation = {
+      date: checkin.dateArrivee,
+      maison: checkin.maison,
+      type: 'entree',
+      motif: `Paiement accommodation - ${checkin.nom}`,
+      montant: checkin.montantTotal,
+      origine: 'checkin',
+      editable: false
+    };
+
+    return financeService.createFinancialOperation(transaction);
+  },
+
+  // Auto-generate transaction from maintenance (expense)
+  createMaintenanceTransaction: async (maintenance: {
+    id: string;
+    assigne: string;
+    dateDeclaration: string;
+    prixMainOeuvre: number;
+    maison: string;
+    typePanne: string;
+    photoFacture?: string;
+  }): Promise<FinancialOperation> => {
+    const transaction: CreateFinancialOperation = {
+      date: maintenance.dateDeclaration,
+      maison: maintenance.maison,
+      type: 'sortie',
+      motif: `Réparation ${maintenance.typePanne} - ${maintenance.assigne}`,
+      montant: maintenance.prixMainOeuvre,
+      origine: 'maintenance',
+      pieceJointe: maintenance.photoFacture,
+      editable: false
+    };
+
+    return financeService.createFinancialOperation(transaction);
+  },
+
+  // Check if transaction already exists to avoid duplicates
+  checkTransactionExists: async (filters: {
+    origine: string;
+    motif: string;
+    maison: string;
+    date: string;
+  }): Promise<boolean> => {
+    const operations = await financeService.getFinancialOperations({
+      houseId: filters.maison,
+      origine: filters.origine
+    });
+
+    return operations.some(op => 
+      op.motif === filters.motif && 
+      op.date === filters.date
+    );
   }
 };

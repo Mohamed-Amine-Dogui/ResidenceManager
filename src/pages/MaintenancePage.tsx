@@ -68,7 +68,7 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { Loading, LoadingInline, LoadingOverlay } from "@/components/ui/loading";
-import { maintenanceService } from "@/services";
+import { maintenanceService, financeService } from "@/services";
 import type { MaintenanceIssue as ApiMaintenanceIssue, CreateMaintenanceIssue } from "@/types/api";
 
 const houses = [
@@ -218,6 +218,25 @@ export default function MaintenancePage() {
       if (editingIssue) {
         const updated = await maintenanceService.updateMaintenanceIssue(editingIssue, issueData);
         console.log('Updated maintenance issue:', updated);
+        
+        // Create financial transaction if maintenance is resolved with costs
+        if (updated.statut === 'resolue' && updated.prixMainOeuvre && updated.prixMainOeuvre > 0) {
+          try {
+            await financeService.createMaintenanceTransaction({
+              id: updated.id,
+              assigne: updated.assigne,
+              dateDeclaration: updated.dateDeclaration,
+              prixMainOeuvre: updated.prixMainOeuvre,
+              maison: updated.maison,
+              typePanne: updated.typePanne,
+              photoFacture: updated.photoFacture
+            });
+            console.log('Created financial transaction for maintenance:', updated.id);
+          } catch (err) {
+            console.error('Error creating financial transaction:', err);
+            // Don't fail the maintenance update if transaction fails
+          }
+        }
         
         // Optimistically update the local state
         setIssues(prev => 

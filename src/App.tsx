@@ -45,7 +45,6 @@ const router = createHashRouter(
   {
     // Add future flags to prevent warnings and improve stability
     future: {
-      v7_startTransition: true,
       v7_relativeSplatPath: true,
     }
   }

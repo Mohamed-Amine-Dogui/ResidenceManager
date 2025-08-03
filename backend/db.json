@@ -69,137 +69,341 @@
   ],
   "reservations": [
     {
+      "id": "res-1",
       "nom": "Jean Dupont",
       "telephone": "+33123456789",
       "email": "jean.dupont@email.com",
       "checkin": "2025-08-01",
       "checkout": "2025-08-08",
       "montantAvance": 300,
-      "maison": "maison-1",
-      "id": "res-1"
+      "maison": "maison-1"
     },
     {
       "id": "res-2",
-      "nom": "Marie Martin",
-      "telephone": "+33987654321",
-      "email": "marie.martin@email.com",
-      "checkin": "2025-08-10",
-      "checkout": "2025-08-15",
-      "montantAvance": 250,
+      "nom": "Sophie Laurent",
+      "telephone": "+33612345678",
+      "email": "sophie.laurent@email.com",
+      "checkin": "2025-08-01",
+      "checkout": "2025-08-05",
+      "montantAvance": 200,
       "maison": "maison-2"
     },
     {
-      "nom": "Mohamed Amine Dogui",
-      "telephone": "01783079765",
-      "email": "douggui.med.amine@gmail.com",
+      "id": "res-3",
+      "nom": "Pierre Martin",
+      "telephone": "+33987654321",
+      "email": "pierre.martin@email.com",
+      "checkin": "2025-08-03",
+      "checkout": "2025-08-10",
+      "montantAvance": 250,
+      "maison": "maison-3"
+    },
+    {
+      "id": "res-4",
+      "nom": "Marie Dubois",
+      "telephone": "+33555666777",
+      "email": "marie.dubois@email.com",
       "checkin": "2025-08-10",
-      "checkout": "2025-08-16",
-      "montantAvance": 50,
+      "checkout": "2025-08-15",
+      "montantAvance": 180,
+      "maison": "maison-4"
+    },
+    {
+      "id": "res-5",
+      "nom": "Ahmed Hassan",
+      "telephone": "+33444555666",
+      "email": "ahmed.hassan@email.com",
+      "checkin": "2025-08-15",
+      "checkout": "2025-08-22",
+      "montantAvance": 350,
+      "maison": "maison-1"
+    }
+  ],
+  "checkins": [
+    {
+      "id": "checkin-1",
+      "reservationId": "res-1",
       "maison": "maison-1",
-      "id": "db3d"
+      "nom": "Jean Dupont",
+      "telephone": "+33123456789",
+      "email": "jean.dupont@email.com",
+      "dateArrivee": "2025-08-01",
+      "dateDepart": "2025-08-08",
+      "avancePaye": 300,
+      "paiementCheckin": 400,
+      "montantTotal": 700,
+      "inventaire": {
+        "litsSimples": 2,
+        "litsDoubles": 1,
+        "matelasSupplementaires": 0,
+        "oreillers": 4,
+        "tables": 1,
+        "chaises": 4,
+        "drapsPropres": 4,
+        "drapsHousse": 4,
+        "couvertures": 4,
+        "television": true,
+        "telecommandeTv": true,
+        "climatiseur": true,
+        "telecommandeClimatiseur": true,
+        "recepteurTv": false,
+        "telecommandeRecepteur": false,
+        "assiettes": 6,
+        "verres": 6,
+        "couverts": 6,
+        "casseroles": 2,
+        "poeles": 1,
+        "refrigerateur": true,
+        "rideaux": true,
+        "lampes": true,
+        "balaiSerpilliere": true
+      },
+      "responsable": "Manager A",
+      "remarques": "Client satisfied with accommodation"
+    },
+    {
+      "id": "checkin-2",
+      "reservationId": "res-2",
+      "maison": "maison-2",
+      "nom": "Sophie Laurent",
+      "telephone": "+33612345678",
+      "email": "sophie.laurent@email.com",
+      "dateArrivee": "2025-08-01",
+      "dateDepart": "2025-08-05",
+      "avancePaye": 200,
+      "paiementCheckin": 300,
+      "montantTotal": 500,
+      "inventaire": {
+        "litsSimples": 1,
+        "litsDoubles": 1,
+        "matelasSupplementaires": 0,
+        "oreillers": 4,
+        "tables": 1,
+        "chaises": 2,
+        "drapsPropres": 4,
+        "drapsHousse": 4,
+        "couvertures": 4,
+        "television": true,
+        "telecommandeTv": true,
+        "climatiseur": true,
+        "telecommandeClimatiseur": true,
+        "recepteurTv": false,
+        "telecommandeRecepteur": false,
+        "assiettes": 4,
+        "verres": 4,
+        "couverts": 4,
+        "casseroles": 2,
+        "poeles": 1,
+        "refrigerateur": true,
+        "rideaux": true,
+        "lampes": true,
+        "balaiSerpilliere": true
+      },
+      "responsable": "Manager B",
+      "remarques": "Short stay, everything in order"
+    },
+    {
+      "id": "checkin-3",
+      "reservationId": "res-3",
+      "maison": "maison-3",
+      "nom": "Pierre Martin",
+      "telephone": "+33987654321",
+      "email": "pierre.martin@email.com",
+      "dateArrivee": "2025-08-03",
+      "dateDepart": "2025-08-10",
+      "avancePaye": 250,
+      "paiementCheckin": 350,
+      "montantTotal": 600,
+      "inventaire": {
+        "litsSimples": 2,
+        "litsDoubles": 1,
+        "matelasSupplementaires": 1,
+        "oreillers": 6,
+        "tables": 1,
+        "chaises": 4,
+        "drapsPropres": 6,
+        "drapsHousse": 6,
+        "couvertures": 6,
+        "television": true,
+        "telecommandeTv": true,
+        "climatiseur": true,
+        "telecommandeClimatiseur": true,
+        "recepteurTv": true,
+        "telecommandeRecepteur": true,
+        "assiettes": 6,
+        "verres": 6,
+        "couverts": 6,
+        "casseroles": 2,
+        "poeles": 1,
+        "refrigerateur": true,
+        "rideaux": true,
+        "lampes": true,
+        "balaiSerpilliere": true
+      },
+      "responsable": "Manager A",
+      "remarques": "Extended stay, additional mattress provided"
     }
   ],
   "financialOperations": [
     {
       "id": "fin-1",
-      "date": "2025-08-01",
+      "date": "2025-07-28",
       "maison": "maison-1",
       "type": "entree",
       "motif": "Avance réservation - Jean Dupont",
       "montant": 300,
       "origine": "reservation",
+      "reservationId": "res-1",
       "pieceJointe": null,
       "editable": false
     },
     {
       "id": "fin-2",
-      "date": "2025-08-07",
+      "date": "2025-08-01",
       "maison": "maison-1",
       "type": "entree",
-      "motif": "Solde réservation - Jean Dupont",
-      "montant": 500,
+      "motif": "Paiement accommodation - Jean Dupont",
+      "montant": 400,
       "origine": "checkin",
+      "checkinId": "checkin-1",
+      "reservationId": "res-1",
       "pieceJointe": null,
       "editable": false
     },
     {
       "id": "fin-3",
-      "date": "2025-08-08",
-      "maison": "maison-1",
-      "type": "sortie",
-      "motif": "Réparation plomberie",
-      "montant": 150,
-      "origine": "maintenance",
-      "pieceJointe": "facture_plomberie.pdf",
+      "date": "2025-07-30",
+      "maison": "maison-2",
+      "type": "entree",
+      "motif": "Avance réservation - Sophie Laurent",
+      "montant": 200,
+      "origine": "reservation",
+      "reservationId": "res-2",
+      "pieceJointe": null,
       "editable": false
     },
     {
       "id": "fin-4",
-      "date": "2025-08-10",
+      "date": "2025-08-01",
+      "maison": "maison-2",
+      "type": "entree",
+      "motif": "Paiement accommodation - Sophie Laurent",
+      "montant": 300,
+      "origine": "checkin",
+      "checkinId": "checkin-2",
+      "reservationId": "res-2",
+      "pieceJointe": null,
+      "editable": false
+    },
+    {
+      "id": "fin-5",
+      "date": "2025-08-02",
+      "maison": "maison-3",
+      "type": "entree",
+      "motif": "Avance réservation - Pierre Martin",
+      "montant": 250,
+      "origine": "reservation",
+      "reservationId": "res-3",
+      "pieceJointe": null,
+      "editable": false
+    },
+    {
+      "id": "fin-6",
+      "date": "2025-08-03",
+      "maison": "maison-3",
+      "type": "entree",
+      "motif": "Paiement accommodation - Pierre Martin",
+      "montant": 350,
+      "origine": "checkin",
+      "checkinId": "checkin-3",
+      "reservationId": "res-3",
+      "pieceJointe": null,
+      "editable": false
+    },
+    {
+      "id": "fin-7",
+      "date": "2025-08-05",
       "maison": "maison-2",
       "type": "sortie",
-      "motif": "Produits de nettoyage",
-      "montant": 45,
+      "motif": "Réparation plomberie - Urgent",
+      "montant": 150,
+      "origine": "maintenance",
+      "maintenanceId": "maint-1",
+      "pieceJointe": "facture_plombier_150.pdf",
+      "editable": false
+    },
+    {
+      "id": "fin-8",
+      "date": "2025-08-07",
+      "maison": "maison-4",
+      "type": "entree",
+      "motif": "Avance réservation - Marie Dubois",
+      "montant": 180,
+      "origine": "reservation",
+      "reservationId": "res-4",
+      "pieceJointe": null,
+      "editable": false
+    },
+    {
+      "id": "fin-9",
+      "date": "2025-08-12",
+      "maison": "maison-1",
+      "type": "entree",
+      "motif": "Avance réservation - Ahmed Hassan",
+      "montant": 350,
+      "origine": "reservation",
+      "reservationId": "res-5",
+      "pieceJointe": null,
+      "editable": false
+    },
+    {
+      "id": "fin-10",
+      "date": "2025-08-04",
+      "maison": "maison-bg",
+      "type": "sortie",
+      "motif": "Produits de nettoyage - Mensuel",
+      "montant": 85,
       "origine": "manuel",
-      "pieceJointe": "recu_carrefour.jpg",
+      "pieceJointe": "recu_supermarche.jpg",
       "editable": true
     }
   ],
   "maintenanceIssues": [
     {
       "id": "maint-1",
-      "maison": "maison-1",
+      "maison": "maison-2",
       "typePanne": "plomberie",
-      "dateDeclaration": "2025-08-05",
-      "assigne": "M. Plombier",
-      "commentaire": "Fuite dans la salle de bain principale",
+      "dateDeclaration": "2025-08-04",
+      "assigne": "Plombier Express SARL",
+      "commentaire": "Fuite robinet salle de bain - réparé rapidement",
       "statut": "resolue",
-      "photoPanne": "fuite_sdb.jpg",
-      "photoFacture": "facture_plombier.pdf",
+      "photoPanne": "fuite_robinet_mv2.jpg",
+      "photoFacture": "facture_plombier_150.pdf",
       "prixMainOeuvre": 150
     },
     {
       "id": "maint-2",
-      "maison": "maison-3",
+      "maison": "maison-4",
       "typePanne": "electricite",
-      "dateDeclaration": "2025-08-10",
-      "assigne": "Électricien Dupont",
-      "commentaire": "Prise électrique ne fonctionne plus dans la cuisine",
+      "dateDeclaration": "2025-08-08",
+      "assigne": "Électricien Martin",
+      "commentaire": "Prise électrique cuisine ne fonctionne plus",
       "statut": "non-resolue",
-      "photoPanne": "prise_cuisine.jpg",
+      "photoPanne": "prise_cuisine_mv4.jpg",
       "photoFacture": null,
       "prixMainOeuvre": null
     },
     {
       "id": "maint-3",
-      "maison": "maison-2",
+      "maison": "maison-5",
       "typePanne": "electromenager",
-      "dateDeclaration": "2025-08-12",
-      "assigne": "Service Technique",
+      "dateDeclaration": "2025-08-09",
+      "assigne": "Service Technique Résidence",
       "commentaire": "Réfrigérateur fait du bruit anormal",
       "statut": "non-resolue",
-      "photoPanne": null,
+      "photoPanne": "frigo_bruit_mv5.jpg",
       "photoFacture": null,
       "prixMainOeuvre": null
-    },
-    {
-      "maison": "maison-1",
-      "typePanne": "electricite",
-      "dateDeclaration": "2025-08-03",
-      "assigne": "mihrez ",
-      "commentaire": "",
-      "statut": "resolue",
-      "id": "e218"
-    },
-    {
-      "id": "e522",
-      "maison": "maison-1",
-      "typePanne": "electricite",
-      "dateDeclaration": "2025-08-03",
-      "assigne": "Mihriz Dhaw",
-      "commentaire": "",
-      "statut": "non-resolue",
-      "photoPanne": "Anmeldung.jpg"
     }
   ],
   "maintenanceTypes": [
@@ -222,88 +426,6 @@
     {
       "id": "autre",
       "name": "Autre"
-    }
-  ],
-  "checkins": [
-    {
-      "id": "fe70",
-      "maison": "maison-1",
-      "nom": "Jean Dupont",
-      "telephone": "+33123456789",
-      "email": "jean.dupont@email.com",
-      "dateArrivee": "2025-08-01",
-      "dateDepart": "2025-08-31",
-      "montantPaye": 300,
-      "montantRestant": 700,
-      "montantTotal": 1000,
-      "inventaire": {
-        "litsSimples": 2,
-        "litsDoubles": 1,
-        "matelasSupplementaires": 0,
-        "oreillers": 4,
-        "tables": 1,
-        "chaises": 4,
-        "drapsPropres": 4,
-        "drapsHousse": 4,
-        "couvertures": 4,
-        "television": true,
-        "telecommandeTv": true,
-        "climatiseur": true,
-        "telecommandeClimatiseur": true,
-        "recepteurTv": false,
-        "telecommandeRecepteur": false,
-        "assiettes": 6,
-        "verres": 6,
-        "couverts": 6,
-        "casseroles": 2,
-        "poeles": 1,
-        "refrigerateur": true,
-        "rideaux": true,
-        "lampes": true,
-        "balaiSerpilliere": true
-      },
-      "responsable": "",
-      "remarques": ""
-    },
-    {
-      "id": "fea4",
-      "maison": "maison-1",
-      "nom": "Mohamed Amine Dogui",
-      "telephone": "01783079765",
-      "email": "douggui.med.amine@gmail.com",
-      "dateArrivee": "2025-08-10",
-      "dateDepart": "2025-08-16",
-      "avancePaye": 50,
-      "paiementCheckin": 950,
-      "montantTotal": 1000,
-      "inventaire": {
-        "litsSimples": 2,
-        "litsDoubles": 1,
-        "matelasSupplementaires": 0,
-        "oreillers": 4,
-        "tables": 1,
-        "chaises": 4,
-        "drapsPropres": 4,
-        "drapsHousse": 4,
-        "couvertures": 4,
-        "television": true,
-        "telecommandeTv": true,
-        "climatiseur": true,
-        "telecommandeClimatiseur": true,
-        "recepteurTv": false,
-        "telecommandeRecepteur": false,
-        "assiettes": 6,
-        "verres": 6,
-        "couverts": 6,
-        "casseroles": 2,
-        "poeles": 1,
-        "refrigerateur": true,
-        "rideaux": true,
-        "lampes": true,
-        "balaiSerpilliere": true
-      },
-      "responsable": "",
-      "remarques": ""
     }
   ],
   "checklistCategories": [
@@ -395,47 +517,32 @@
       "description": "Nettoyer la terrasse",
       "produitAUtiliser": "Balai + Eau + Savon",
       "type": "nettoyage"
-    },
-    {
-      "id": "f7f9",
-      "maison": "maison-1",
-      "etape": 8,
-      "categorie": "Salle de Bain",
-      "description": "test ",
-      "produitAUtiliser": "Zit il FsalALAWS",
-      "type": "nettoyage"
     }
   ],
   "houseChecklistStatus": [
     {
+      "id": "status-1",
+      "maison": "maison-1",
+      "checklistItemId": "check-1",
       "completed": true,
-      "completedAt": "2025-08-03T13:23:51.023Z",
-      "id": "status-1"
+      "completedAt": "2025-08-01T08:00:00Z",
+      "updatedBy": "1"
     },
     {
       "id": "status-2",
       "maison": "maison-1",
       "checklistItemId": "check-2",
       "completed": true,
-      "completedAt": "2025-08-08T10:35:00Z",
+      "completedAt": "2025-08-01T08:15:00Z",
       "updatedBy": "1"
     },
     {
+      "id": "status-3",
+      "maison": "maison-2",
+      "checklistItemId": "check-1",
       "completed": true,
-      "completedAt": "2025-08-03T13:10:56.584Z",
-      "id": "status-3"
-    },
-    {
-      "id": "30bc",
-      "checklistItemId": "check-4",
-      "completed": true,
-      "completedAt": "2025-08-03T13:08:28.059Z"
-    },
-    {
-      "id": "cb20",
-      "checklistItemId": "f7f9",
-      "completed": true,
-      "completedAt": "2025-08-03T13:08:28.064Z"
+      "completedAt": "2025-08-01T09:00:00Z",
+      "updatedBy": "1"
     }
   ],
   "houseCategoryStatus": [
@@ -444,93 +551,125 @@
       "maison": "maison-1",
       "categoryId": 1,
       "isReady": true,
-      "readyAt": "2025-08-08T10:35:00Z"
+      "readyAt": "2025-08-01T08:30:00Z"
     },
     {
+      "id": "cat-status-2",
+      "maison": "maison-2",
+      "categoryId": 1,
       "isReady": true,
-      "readyAt": "2025-08-03T13:09:42.334Z",
-      "id": "cat-status-2"
+      "readyAt": "2025-08-01T09:30:00Z"
     }
   ],
   "dashboardMetrics": [
     {
-      "date": "2025-08-15",
+      "date": "2025-08-01",
       "checkinToday": 2,
-      "checkoutToday": 1,
+      "checkoutToday": 0,
+      "maintenancesTodo": 0,
+      "housesReady": 10,
+      "paymentsCompleted": 2,
+      "paymentsOpen": 3,
+      "advancePayments": 2
+    },
+    {
+      "date": "2025-08-03",
+      "checkinToday": 1,
+      "checkoutToday": 0,
+      "maintenancesTodo": 0,
+      "housesReady": 9,
+      "paymentsCompleted": 3,
+      "paymentsOpen": 2,
+      "advancePayments": 3
+    },
+    {
+      "date": "2025-08-15",
+      "checkinToday": 0,
+      "checkoutToday": 2,
       "maintenancesTodo": 2,
       "housesReady": 8,
-      "paymentsCompleted": 15,
-      "paymentsOpen": 5,
-      "advancePayments": 8
+      "paymentsCompleted": 9,
+      "paymentsOpen": 1,
+      "advancePayments": 1
     }
   ],
   "occupancyData": [
     {
+      "date": "2025-08-01",
+      "occupied": 2,
+      "free": 10
+    },
+    {
+      "date": "2025-08-03",
+      "occupied": 3,
+      "free": 9
+    },
+    {
       "date": "2025-08-15",
-      "occupied": 4,
-      "free": 8
+      "occupied": 1,
+      "free": 11
     }
   ],
   "revenueData": [
     {
       "jour": "2025-08-01",
-      "revenus": 1200
+      "revenus": 700
     },
     {
       "jour": "2025-08-02",
-      "revenus": 800
+      "revenus": 0
     },
     {
       "jour": "2025-08-03",
-      "revenus": 1500
+      "revenus": 350
     },
     {
       "jour": "2025-08-04",
-      "revenus": 1100
+      "revenus": 0
     },
     {
       "jour": "2025-08-05",
-      "revenus": 900
+      "revenus": 0
     },
     {
       "jour": "2025-08-06",
-      "revenus": 1300
+      "revenus": 0
     },
     {
       "jour": "2025-08-07",
-      "revenus": 1600
+      "revenus": 180
     },
     {
       "jour": "2025-08-08",
-      "revenus": 1000
+      "revenus": 0
     },
     {
       "jour": "2025-08-09",
-      "revenus": 1200
+      "revenus": 0
     },
     {
       "jour": "2025-08-10",
-      "revenus": 1400
+      "revenus": 0
     },
     {
       "jour": "2025-08-11",
-      "revenus": 1100
+      "revenus": 0
     },
     {
       "jour": "2025-08-12",
-      "revenus": 1800
+      "revenus": 350
     },
     {
       "jour": "2025-08-13",
-      "revenus": 1300
+      "revenus": 0
     },
     {
       "jour": "2025-08-14",
-      "revenus": 1500
+      "revenus": 0
     },
     {
       "jour": "2025-08-15",
-      "revenus": 1700
+      "revenus": 0
     }
   ]
 }

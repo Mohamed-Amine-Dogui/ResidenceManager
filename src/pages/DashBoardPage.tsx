@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -40,77 +40,125 @@ import {
 } from "@/components/ui/popover";
 import { ChartTooltip } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { dashboardService } from "@/services";
+import type { DashboardMetrics, OccupancyData, RevenueDataPoint } from "@/types/api";
+import { LoadingOverlay } from "@/components/ui/loading";
+import { Toaster, toast } from "sonner";
 
 export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [occupancy, setOccupancy] = useState<OccupancyData | null>(null);
+  const [revenue, setRevenue] = useState<RevenueDataPoint[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data for demonstration
+  // Load dashboard data from API
+  useEffect(() => {
+    loadDashboardData();
+  }, [selectedDate]);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      
+      // Load each data type separately from db.json
+      const [metricsData, occupancyData, revenueData] = await Promise.all([
+        dashboardService.getDashboardMetrics(dateStr),
+        dashboardService.getOccupancyData(dateStr), 
+        dashboardService.getRevenueData()
+      ]);
+      
+      setMetrics(metricsData);
+      setOccupancy(occupancyData);
+      setRevenue(revenueData);
+      
+      console.log('Dashboard data loaded:', { metricsData, occupancyData, revenueData });
+    } catch (err) {
+      setError('Erreur lors du chargement des données');
+      console.error('Error loading dashboard data:', err);
+      toast.error('Erreur', {
+        description: 'Impossible de charger les données du tableau de bord'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Generate key metrics from API data or use defaults
   const keyMetrics = [
     {
-      title: "Check-in",
-      value: 8,
+      title: "Check-in complétés",
+      value: metrics?.checkinToday || 0,
       icon: LogIn,
-      description: "Arrivées aujourd'hui",
+      description: "Le client est dans la maison",
+    },
+    {
+      title: "Paiements ouverts",
+      value: metrics?.paymentsOpen || 0,
+      icon: Clock,
+      description: "Chekin en attente",
     },
     {
       title: "Check-out",
-      value: 5,
+      value: metrics?.checkoutToday || 0,
       icon: LogOut,
-      description: "Départs aujourd'hui",
+      description: "Départs planifiés aujourd'hui",
+    },
+    {
+      title: "Check-out complétés",
+      value: metrics?.checkoutToday || 0,
+      icon: LogOut,
+      description: "Le client a quité dans la maison",
     },
     {
       title: "Maintenances",
-      value: 3,
+      value: metrics?.maintenancesTodo || 0,
       icon: Wrench,
       description: "À effectuer",
     },
     {
       title: "Maisons prêtes",
-      value: 10,
+      value: metrics?.housesReady || 0,
       icon: Home,
       description: "Disponibles",
     },
     {
       title: "Paiements complétés",
-      value: 12,
+      value: metrics?.paymentsCompleted || 0,
       icon: CheckCircle,
       description: "Ce mois-ci",
     },
     {
-      title: "Paiements ouverts",
-      value: 4,
-      icon: Clock,
-      description: "En attente",
-    },
-    {
       title: "Paiements d'avance",
-      value: 7,
+      value: metrics?.advancePayments || 0,
       icon: DollarSign,
       description: "Réservations",
     },
   ];
 
-  // Pie chart data for house occupancy
-const occupancyData = [
-  { name: "Occupées", value: 9, fill: "#1d4ed8" }, // blue-700
-  { name: "Libres", value: 4, fill: "#7dd3fc" },   // sky-300
-];
+  // Pie chart data from API or defaults
+  const occupancyData = [
+    { name: "Occupées", value: occupancy?.occupied || 0, fill: "#1d4ed8" },
+    { name: "Libres", value: occupancy?.free || 0, fill: "#7dd3fc" },
+  ];
 
-
-
-  // Area chart data for monthly revenue
-  const revenueData = [
-    { jour: "1", revenus: 2400 },
-    { jour: "5", revenus: 1398 },
-    { jour: "10", revenus: 9800 },
-    { jour: "15", revenus: 3908 },
-    { jour: "20", revenus: 4800 },
-    { jour: "25", revenus: 3800 },
-    { jour: "30", revenus: 4300 },
+  // Area chart data from API or defaults
+  const revenueData = revenue.length > 0 ? revenue : [
+    { jour: "1", revenus: 0 },
+    { jour: "5", revenus: 0 },
+    { jour: "10", revenus: 0 },
+    { jour: "15", revenus: 0 },
+    { jour: "20", revenus: 0 },
+    { jour: "25", revenus: 0 },
+    { jour: "30", revenus: 0 },
   ];
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 p-6">
+      {loading && <LoadingOverlay message="Chargement du tableau de bord..." />}
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Header */}
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
@@ -239,20 +287,24 @@ const occupancyData = [
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 rounded-full bg-blue-700"></div>
                   <span className="text-sm text-slate-600 dark:text-slate-400">
-                    Occupées (9)
+                    Occupées ({occupancy?.occupied || 0})
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 rounded-full bg-sky-300"></div>
                   <span className="text-sm text-slate-600 dark:text-slate-400">
-                    Libres (4)
+                    Libres ({occupancy?.free || 0})
                   </span>
                 </div>
               </div>
               <div className="mt-3 text-center">
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   <span className="font-semibold text-slate-900 dark:text-slate-50">
-                    {Math.round((9 / 13) * 100)}%
+                    {(() => {
+                      if (!occupancy) return 0;
+                      const total = occupancy.occupied + occupancy.free;
+                      return total > 0 ? Math.round((occupancy.occupied / total) * 100) : 0;
+                    })()}%
                   </span>{" "}
                   d'occupation
                 </p>
@@ -357,6 +409,7 @@ const occupancyData = [
             </CardContent>
           </Card>
         </div>
+        
       </div>
     </div>
   );

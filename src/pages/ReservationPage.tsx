@@ -49,7 +49,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { reservationService } from "@/services";
+import { reservationService, financeService } from "@/services";
 import type { Reservation, CreateReservation } from "@/types/api";
 import { Loading, LoadingInline, LoadingOverlay } from "@/components/ui/loading";
 
@@ -285,6 +285,24 @@ export default function ReservationPage() {
       } else {
         const created = await reservationService.createReservation(reservationData);
         console.log('Created reservation:', created);
+        
+        // Create financial transaction for advance payment
+        if (created.montantAvance > 0) {
+          try {
+            await financeService.createReservationTransaction({
+              id: created.id,
+              nom: created.nom,
+              checkin: created.checkin,
+              montantAvance: created.montantAvance,
+              maison: created.maison
+            });
+            console.log('Created financial transaction for reservation:', created.id);
+          } catch (err) {
+            console.error('Error creating financial transaction:', err);
+            // Don't fail the reservation creation if transaction fails
+          }
+        }
+        
         // Optimistically add to local state
         setReservations(prev => {
           const newState = [...prev, created];

@@ -34,7 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Toaster, toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Loading, LoadingInline, LoadingOverlay } from "@/components/ui/loading";
-import { checkinService, reservationService } from "@/services";
+import { checkinService, reservationService, financeService } from "@/services";
 import type { CheckInData as ApiCheckInData, CreateCheckIn, InventaireType } from "@/types/api";
 import {
   Table,
@@ -257,6 +257,23 @@ export default function CheckInOutPage() {
       };
 
       const createdCheckIn = await checkinService.createCheckin(newCheckInData);
+
+      // Create financial transaction for accommodation payment
+      if (createdCheckIn.montantTotal > 0) {
+        try {
+          await financeService.createCheckinTransaction({
+            id: createdCheckIn.id,
+            nom: createdCheckIn.nom,
+            dateArrivee: createdCheckIn.dateArrivee,
+            montantTotal: createdCheckIn.montantTotal,
+            maison: createdCheckIn.maison
+          });
+          console.log('Created financial transaction for check-in:', createdCheckIn.id);
+        } catch (err) {
+          console.error('Error creating financial transaction:', err);
+          // Don't fail the check-in creation if transaction fails
+        }
+      }
 
       // Optimistically update local state
       setCheckInRecords((prev) => [...prev, createdCheckIn]);

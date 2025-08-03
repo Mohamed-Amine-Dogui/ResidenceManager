@@ -4,13 +4,27 @@ import type { DashboardMetrics, OccupancyData, RevenueDataPoint } from '../types
 export const dashboardService = {
   // Get dashboard metrics for a specific date
   getDashboardMetrics: async (date?: string): Promise<DashboardMetrics> => {
-    const endpoint = date 
-      ? `/dashboardMetrics?date=${date}` 
-      : '/dashboardMetrics';
+    console.log('🔍 getDashboardMetrics called with date:', date);
+    const allMetrics = await api.get<Array<DashboardMetrics & { date: string }>>('/dashboardMetrics');
     
-    const metrics = await api.get<DashboardMetrics[]>(endpoint);
-    // Return the first (and likely only) metrics object
-    return metrics[0] || {
+    console.log('🔍 Raw API response - all metrics:', allMetrics);
+    console.log('🔍 Number of metrics returned:', allMetrics.length);
+    
+    // Filter by date if provided
+    let targetMetric = null;
+    if (date) {
+      console.log('🔍 Filtering for date:', date);
+      targetMetric = allMetrics.find(m => {
+        console.log('🔍 Comparing:', m.date, '===', date, '?', m.date === date);
+        return m.date === date;
+      });
+    } else {
+      targetMetric = allMetrics[0];
+    }
+    
+    console.log('🔍 Found target metric:', targetMetric);
+    
+    const result = targetMetric || {
       checkinToday: 0,
       checkoutToday: 0,
       maintenancesTodo: 0,
@@ -19,16 +33,36 @@ export const dashboardService = {
       paymentsOpen: 0,
       advancePayments: 0
     };
+    
+    console.log('🔍 Returning dashboard metrics:', result);
+    return result;
   },
 
   // Get house occupancy data
   getOccupancyData: async (date?: string): Promise<OccupancyData> => {
-    const endpoint = date 
-      ? `/occupancyData?date=${date}` 
-      : '/occupancyData';
+    console.log('🏠 getOccupancyData called with date:', date);
+    const allOccupancy = await api.get<Array<OccupancyData & { date: string }>>('/occupancyData');
     
-    const occupancy = await api.get<OccupancyData[]>(endpoint);
-    return occupancy[0] || { occupied: 0, free: 0 };
+    console.log('🏠 Raw API response - all occupancy:', allOccupancy);
+    console.log('🏠 Number of occupancy records:', allOccupancy.length);
+    
+    // Filter by date if provided
+    let targetOccupancy = null;
+    if (date) {
+      console.log('🏠 Filtering for date:', date);
+      targetOccupancy = allOccupancy.find(o => {
+        console.log('🏠 Comparing:', o.date, '===', date, '?', o.date === date);
+        return o.date === date;
+      });
+    } else {
+      targetOccupancy = allOccupancy[0];
+    }
+    
+    console.log('🏠 Found target occupancy:', targetOccupancy);
+    
+    const result = targetOccupancy || { occupied: 0, free: 0 };
+    console.log('🏠 Returning occupancy data:', result);
+    return result;
   },
 
   // Get revenue data for charts
