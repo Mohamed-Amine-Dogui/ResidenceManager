@@ -78,9 +78,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Loading, LoadingInline, LoadingOverlay } from "@/components/ui/loading";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+
+import { financeService } from "@/services";
+import type { FinancialOperation as ApiFinancialOperation, CreateFinancialOperation } from "@/types/api";
 
 const houses = [
   { id: "all", name: "Toutes" },
@@ -106,20 +110,18 @@ const originTypes = [
   { id: "manuel", name: "Manuel" },
 ];
 
-interface FinancialOperation {
-  id: string;
-  date: string;
-  maison: string;
-  type: "entree" | "sortie";
-  motif: string;
-  montant: number;
-  origine: "reservation" | "maintenance" | "checkin" | "manuel";
+// Use the API type, but extend it for local file handling
+interface FinancialOperation extends ApiFinancialOperation {
   pieceJointe?: File | string;
-  editable: boolean;
 }
 
 export default function FinancePage() {
   const [operations, setOperations] = useState<FinancialOperation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [editingOperation, setEditingOperation] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [operationToDelete, setOperationToDelete] = useState<string | null>(
@@ -149,62 +151,42 @@ export default function FinancePage() {
     pieceJointe: null as File | null,
   });
 
-  // Mock data initialization
+  // Load financial operations from API
   useEffect(() => {
-    const mockOperations: FinancialOperation[] = [
-      {
-        id: "1",
-        date: "2025-08-15",
-        maison: "maison-1",
-        type: "entree",
-        motif: "Avance réservation - Jean Dupont",
-        montant: 700,
-        origine: "reservation",
-        editable: false,
-      },
-      {
-        id: "2",
-        date: "2025-08-20",
-        maison: "maison-1",
-        type: "entree",
-        motif: "Solde réservation - Jean Dupont",
-        montant: 900,
-        origine: "checkin",
-        editable: false,
-      },
-      {
-        id: "3",
-        date: "2025-08-18",
-        maison: "maison-2",
-        type: "sortie",
-        motif: "Réparation électricité - Matériaux",
-        montant: 85,
-        origine: "maintenance",
-        editable: false,
-      },
-      {
-        id: "4",
-        date: "2025-08-18",
-        maison: "maison-2",
-        type: "sortie",
-        motif: "Réparation électricité - Main d'œuvre",
-        montant: 150,
-        origine: "maintenance",
-        editable: false,
-      },
-      {
-        id: "5",
-        date: "2025-08-10",
-        maison: "maison-3",
-        type: "sortie",
-        motif: "Salaire employé - Janvier",
-        montant: 600,
-        origine: "manuel",
-        editable: true,
-      },
-    ];
-    setOperations(mockOperations);
-  }, []);
+    loadOperations();
+  }, [filters.maison, filters.annee]);
+
+  const loadOperations = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Build filters for API call
+      const apiFilters: Parameters<typeof financeService.getFinancialOperations>[0] = {};
+      
+      if (filters.maison !== 'all') {
+        apiFilters.houseId = filters.maison;
+      }
+      
+      if (filters.origine !== 'all') {
+        apiFilters.origine = filters.origine;
+      }
+      
+      apiFilters.year = parseInt(filters.annee);
+      
+      const data = await financeService.getFinancialOperations(apiFilters);
+      setOperations(data);
+      console.log('Loaded financial operations:', data);
+    } catch (err) {
+      setError('Erreur lors du chargement des opérations');
+      console.error('Error loading financial operations:', err);
+      toast.error('Erreur', {
+        description: 'Impossible de charger les opérations financières'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredOperations = operations.filter((op) => {
     const opDate = new Date(op.date);
@@ -256,8 +238,12 @@ export default function FinancePage() {
     };
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (submitting || processing) {
+      return;
+    }
 
     if (!formData.maison || !formData.motif || !formData.montant) {
       toast.error("Erreur", {
@@ -266,8 +252,7 @@ export default function FinancePage() {
       return;
     }
 
-    const operationData: FinancialOperation = {
-      id: editingOperation || Date.now().toString(),
+    const operationData: CreateFinancialOperation = {
       date: format(formData.date, "yyyy-MM-dd"),
       maison: formData.maison,
       type: formData.type,
@@ -278,22 +263,43 @@ export default function FinancePage() {
       editable: true,
     };
 
-    if (editingOperation) {
-      setOperations((prev) =>
-        prev.map((op) => (op.id === editingOperation ? operationData : op))
-      );
-      setEditingOperation(null);
-      toast.success("Opération mise à jour", {
-        description: "L'opération a été mise à jour avec succès",
-      });
-    } else {
-      setOperations((prev) => [...prev, operationData]);
-      toast.success("Opération ajoutée", {
-        description: "La nouvelle opération a été ajoutée avec succès",
-      });
-    }
+    try {
+      setSubmitting(true);
+      setProcessing(true);
 
-    resetForm();
+      if (editingOperation) {
+        const updated = await financeService.updateFinancialOperation(editingOperation, operationData);
+        console.log('Updated financial operation:', updated);
+        
+        // Optimistically update the local state
+        setOperations(prev => 
+          prev.map(op => op.id === editingOperation ? updated : op)
+        );
+        setEditingOperation(null);
+        toast.success("Opération mise à jour", {
+          description: "L'opération a été mise à jour avec succès",
+        });
+      } else {
+        const created = await financeService.createFinancialOperation(operationData);
+        console.log('Created financial operation:', created);
+        
+        // Optimistically add to local state
+        setOperations(prev => [...prev, created]);
+        toast.success("Opération ajoutée", {
+          description: "La nouvelle opération a été ajoutée avec succès",
+        });
+      }
+
+      resetForm();
+    } catch (err) {
+      console.error('Error saving financial operation:', err);
+      toast.error("Erreur", {
+        description: "Impossible de sauvegarder l'opération",
+      });
+    } finally {
+      setSubmitting(false);
+      setProcessing(false);
+    }
   };
 
   const resetForm = () => {
@@ -341,12 +347,29 @@ export default function FinancePage() {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (operationToDelete) {
-      setOperations((prev) => prev.filter((op) => op.id !== operationToDelete));
-      toast.success("Opération supprimée", {
-        description: "L'opération a été supprimée avec succès",
-      });
+      try {
+        setDeleting(operationToDelete);
+        setProcessing(true);
+
+        await financeService.deleteFinancialOperation(operationToDelete);
+        
+        // Optimistically remove from local state
+        setOperations(prev => prev.filter(op => op.id !== operationToDelete));
+        
+        toast.success("Opération supprimée", {
+          description: "L'opération a été supprimée avec succès",
+        });
+      } catch (err) {
+        console.error('Error deleting financial operation:', err);
+        toast.error("Erreur", {
+          description: "Impossible de supprimer l'opération",
+        });
+      } finally {
+        setDeleting(null);
+        setProcessing(false);
+      }
     }
     setDeleteDialogOpen(false);
     setOperationToDelete(null);
@@ -513,33 +536,62 @@ export default function FinancePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((operation) => (
-                <TableRow
-                  key={operation.id}
-                  className="border-slate-200 dark:border-slate-800"
-                >
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(operation)}
-                        disabled={!operation.editable}
-                        className="border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDelete(operation.id)}
-                        disabled={!operation.editable}
-                        className="border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-200 dark:hover:border-red-800 disabled:opacity-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    <Loading message="Chargement des opérations..." />
                   </TableCell>
+                </TableRow>
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    <span className="text-red-600 dark:text-red-400">
+                      {error}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ) : data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    <span className="text-slate-600 dark:text-slate-400">
+                      Aucune opération trouvée pour cette période
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                data.map((operation) => (
+                  <TableRow
+                    key={operation.id}
+                    className={`border-slate-200 dark:border-slate-800 ${
+                      deleting === operation.id ? 'opacity-50' : ''
+                    }`}
+                  >
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(operation)}
+                          disabled={!operation.editable || deleting === operation.id}
+                          className="border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDelete(operation.id)}
+                          disabled={!operation.editable || deleting === operation.id}
+                          className="border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-200 dark:hover:border-red-800 disabled:opacity-50"
+                        >
+                          {deleting === operation.id ? (
+                            <LoadingInline size={16} color="#64748b" className="mr-0" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </TableCell>
                   <TableCell className="text-slate-600 dark:text-slate-400">
                     {format(new Date(operation.date), "PPP", { locale: fr })}
                   </TableCell>
@@ -593,7 +645,8 @@ export default function FinancePage() {
                     )}
                   </TableCell>
                 </TableRow>
-              ))}
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -633,6 +686,9 @@ export default function FinancePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 p-6">
+      {/* Processing Overlay */}
+      {processing && <LoadingOverlay message="Traitement en cours..." />}
+      
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -999,11 +1055,14 @@ export default function FinancePage() {
             setFormData={memoizedSetFormData}
             handleSubmit={(e) => {
               handleSubmit(e);
-              setAddFormVisible(false);
+              if (!submitting) {
+                setAddFormVisible(false);
+              }
             }}
             editingOperation={editingOperation}
             closeDialog={memoizedCloseDialog}
             houses={houses}
+            submitting={submitting}
           />
         </SheetContent>
       </Sheet>

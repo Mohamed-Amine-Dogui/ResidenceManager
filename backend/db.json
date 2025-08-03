@@ -1,0 +1,536 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "admin@residencemanager.com",
+      "password_hash": "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewgJ8Q3W.o4NQjZ2",
+      "role": "admin",
+      "created_at": "2025-01-01T00:00:00Z",
+      "last_login": "2025-01-15T10:30:00Z"
+    },
+    {
+      "id": "2",
+      "email": "user@residencemanager.com",
+      "password_hash": "$2b$12$example2",
+      "role": "user",
+      "created_at": "2025-01-02T00:00:00Z",
+      "last_login": "2025-01-14T15:20:00Z"
+    }
+  ],
+  "houses": [
+    {
+      "id": "maison-1",
+      "name": "Mv1"
+    },
+    {
+      "id": "maison-2",
+      "name": "Mv2"
+    },
+    {
+      "id": "maison-3",
+      "name": "Mv3"
+    },
+    {
+      "id": "maison-4",
+      "name": "Mv4"
+    },
+    {
+      "id": "maison-5",
+      "name": "Mv5"
+    },
+    {
+      "id": "maison-6",
+      "name": "Mv6"
+    },
+    {
+      "id": "maison-7",
+      "name": "Mv7"
+    },
+    {
+      "id": "maison-8",
+      "name": "Mv8"
+    },
+    {
+      "id": "maison-9",
+      "name": "Mv9"
+    },
+    {
+      "id": "maison-10",
+      "name": "Mv10"
+    },
+    {
+      "id": "maison-bg",
+      "name": "Bg"
+    },
+    {
+      "id": "maison-high",
+      "name": "High"
+    }
+  ],
+  "reservations": [
+    {
+      "nom": "Jean Dupont",
+      "telephone": "+33123456789",
+      "email": "jean.dupont@email.com",
+      "checkin": "2025-08-01",
+      "checkout": "2025-08-08",
+      "montantAvance": 300,
+      "maison": "maison-1",
+      "id": "res-1"
+    },
+    {
+      "id": "res-2",
+      "nom": "Marie Martin",
+      "telephone": "+33987654321",
+      "email": "marie.martin@email.com",
+      "checkin": "2025-08-10",
+      "checkout": "2025-08-15",
+      "montantAvance": 250,
+      "maison": "maison-2"
+    },
+    {
+      "nom": "Mohamed Amine Dogui",
+      "telephone": "01783079765",
+      "email": "douggui.med.amine@gmail.com",
+      "checkin": "2025-08-10",
+      "checkout": "2025-08-16",
+      "montantAvance": 50,
+      "maison": "maison-1",
+      "id": "db3d"
+    }
+  ],
+  "financialOperations": [
+    {
+      "id": "fin-1",
+      "date": "2025-08-01",
+      "maison": "maison-1",
+      "type": "entree",
+      "motif": "Avance réservation - Jean Dupont",
+      "montant": 300,
+      "origine": "reservation",
+      "pieceJointe": null,
+      "editable": false
+    },
+    {
+      "id": "fin-2",
+      "date": "2025-08-07",
+      "maison": "maison-1",
+      "type": "entree",
+      "motif": "Solde réservation - Jean Dupont",
+      "montant": 500,
+      "origine": "checkin",
+      "pieceJointe": null,
+      "editable": false
+    },
+    {
+      "id": "fin-3",
+      "date": "2025-08-08",
+      "maison": "maison-1",
+      "type": "sortie",
+      "motif": "Réparation plomberie",
+      "montant": 150,
+      "origine": "maintenance",
+      "pieceJointe": "facture_plomberie.pdf",
+      "editable": false
+    },
+    {
+      "id": "fin-4",
+      "date": "2025-08-10",
+      "maison": "maison-2",
+      "type": "sortie",
+      "motif": "Produits de nettoyage",
+      "montant": 45,
+      "origine": "manuel",
+      "pieceJointe": "recu_carrefour.jpg",
+      "editable": true
+    }
+  ],
+  "maintenanceIssues": [
+    {
+      "id": "maint-1",
+      "maison": "maison-1",
+      "typePanne": "plomberie",
+      "dateDeclaration": "2025-08-05",
+      "assigne": "M. Plombier",
+      "commentaire": "Fuite dans la salle de bain principale",
+      "statut": "resolue",
+      "photoPanne": "fuite_sdb.jpg",
+      "photoFacture": "facture_plombier.pdf",
+      "prixMainOeuvre": 150
+    },
+    {
+      "id": "maint-2",
+      "maison": "maison-3",
+      "typePanne": "electricite",
+      "dateDeclaration": "2025-08-10",
+      "assigne": "Électricien Dupont",
+      "commentaire": "Prise électrique ne fonctionne plus dans la cuisine",
+      "statut": "non-resolue",
+      "photoPanne": "prise_cuisine.jpg",
+      "photoFacture": null,
+      "prixMainOeuvre": null
+    },
+    {
+      "id": "maint-3",
+      "maison": "maison-2",
+      "typePanne": "electromenager",
+      "dateDeclaration": "2025-08-12",
+      "assigne": "Service Technique",
+      "commentaire": "Réfrigérateur fait du bruit anormal",
+      "statut": "non-resolue",
+      "photoPanne": null,
+      "photoFacture": null,
+      "prixMainOeuvre": null
+    },
+    {
+      "maison": "maison-1",
+      "typePanne": "electricite",
+      "dateDeclaration": "2025-08-03",
+      "assigne": "mihrez ",
+      "commentaire": "",
+      "statut": "resolue",
+      "id": "e218"
+    },
+    {
+      "id": "e522",
+      "maison": "maison-1",
+      "typePanne": "electricite",
+      "dateDeclaration": "2025-08-03",
+      "assigne": "Mihriz Dhaw",
+      "commentaire": "",
+      "statut": "non-resolue",
+      "photoPanne": "Anmeldung.jpg"
+    }
+  ],
+  "maintenanceTypes": [
+    {
+      "id": "electricite",
+      "name": "Électricité"
+    },
+    {
+      "id": "plomberie",
+      "name": "Plomberie"
+    },
+    {
+      "id": "electromenager",
+      "name": "Électroménager"
+    },
+    {
+      "id": "peinture",
+      "name": "Peinture"
+    },
+    {
+      "id": "autre",
+      "name": "Autre"
+    }
+  ],
+  "checkins": [
+    {
+      "id": "fe70",
+      "maison": "maison-1",
+      "nom": "Jean Dupont",
+      "telephone": "+33123456789",
+      "email": "jean.dupont@email.com",
+      "dateArrivee": "2025-08-01",
+      "dateDepart": "2025-08-31",
+      "montantPaye": 300,
+      "montantRestant": 700,
+      "montantTotal": 1000,
+      "inventaire": {
+        "litsSimples": 2,
+        "litsDoubles": 1,
+        "matelasSupplementaires": 0,
+        "oreillers": 4,
+        "tables": 1,
+        "chaises": 4,
+        "drapsPropres": 4,
+        "drapsHousse": 4,
+        "couvertures": 4,
+        "television": true,
+        "telecommandeTv": true,
+        "climatiseur": true,
+        "telecommandeClimatiseur": true,
+        "recepteurTv": false,
+        "telecommandeRecepteur": false,
+        "assiettes": 6,
+        "verres": 6,
+        "couverts": 6,
+        "casseroles": 2,
+        "poeles": 1,
+        "refrigerateur": true,
+        "rideaux": true,
+        "lampes": true,
+        "balaiSerpilliere": true
+      },
+      "responsable": "",
+      "remarques": ""
+    },
+    {
+      "id": "fea4",
+      "maison": "maison-1",
+      "nom": "Mohamed Amine Dogui",
+      "telephone": "01783079765",
+      "email": "douggui.med.amine@gmail.com",
+      "dateArrivee": "2025-08-10",
+      "dateDepart": "2025-08-16",
+      "avancePaye": 50,
+      "paiementCheckin": 950,
+      "montantTotal": 1000,
+      "inventaire": {
+        "litsSimples": 2,
+        "litsDoubles": 1,
+        "matelasSupplementaires": 0,
+        "oreillers": 4,
+        "tables": 1,
+        "chaises": 4,
+        "drapsPropres": 4,
+        "drapsHousse": 4,
+        "couvertures": 4,
+        "television": true,
+        "telecommandeTv": true,
+        "climatiseur": true,
+        "telecommandeClimatiseur": true,
+        "recepteurTv": false,
+        "telecommandeRecepteur": false,
+        "assiettes": 6,
+        "verres": 6,
+        "couverts": 6,
+        "casseroles": 2,
+        "poeles": 1,
+        "refrigerateur": true,
+        "rideaux": true,
+        "lampes": true,
+        "balaiSerpilliere": true
+      },
+      "responsable": "",
+      "remarques": ""
+    }
+  ],
+  "checklistCategories": [
+    {
+      "id": 1,
+      "name": "Entrée"
+    },
+    {
+      "id": 2,
+      "name": "Salle de Bain"
+    },
+    {
+      "id": 3,
+      "name": "Couloir"
+    },
+    {
+      "id": 4,
+      "name": "Cuisine"
+    },
+    {
+      "id": 5,
+      "name": "Chambres"
+    },
+    {
+      "id": 6,
+      "name": "Extérieur"
+    }
+  ],
+  "checklistItems": [
+    {
+      "id": "check-1",
+      "maison": "maison-1",
+      "etape": 1,
+      "categorie": "Entrée",
+      "description": "Nettoyer le sol de l'entrée",
+      "produitAUtiliser": "Serpillière + Javel",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-2",
+      "maison": "maison-1",
+      "etape": 2,
+      "categorie": "Entrée",
+      "description": "Vérifier l'éclairage de l'entrée",
+      "produitAUtiliser": "Ampoules de rechange",
+      "type": "vérification"
+    },
+    {
+      "id": "check-3",
+      "maison": "maison-1",
+      "etape": 3,
+      "categorie": "Salle de Bain",
+      "description": "Nettoyer la douche et les sanitaires",
+      "produitAUtiliser": "Ajax + Javel + Éponges",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-4",
+      "maison": "maison-1",
+      "etape": 4,
+      "categorie": "Salle de Bain",
+      "description": "Vérifier la plomberie",
+      "produitAUtiliser": "Outils de base",
+      "type": "vérification"
+    },
+    {
+      "id": "check-5",
+      "maison": "maison-1",
+      "etape": 5,
+      "categorie": "Cuisine",
+      "description": "Nettoyer tous les appareils électroménagers",
+      "produitAUtiliser": "OMO + Éponges + Chiffons",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-6",
+      "maison": "maison-1",
+      "etape": 6,
+      "categorie": "Chambres",
+      "description": "Changer les draps et housses",
+      "produitAUtiliser": "Linge propre",
+      "type": "entretien"
+    },
+    {
+      "id": "check-7",
+      "maison": "maison-1",
+      "etape": 7,
+      "categorie": "Extérieur",
+      "description": "Nettoyer la terrasse",
+      "produitAUtiliser": "Balai + Eau + Savon",
+      "type": "nettoyage"
+    },
+    {
+      "id": "f7f9",
+      "maison": "maison-1",
+      "etape": 8,
+      "categorie": "Salle de Bain",
+      "description": "test ",
+      "produitAUtiliser": "Zit il FsalALAWS",
+      "type": "nettoyage"
+    }
+  ],
+  "houseChecklistStatus": [
+    {
+      "completed": true,
+      "completedAt": "2025-08-03T13:23:51.023Z",
+      "id": "status-1"
+    },
+    {
+      "id": "status-2",
+      "maison": "maison-1",
+      "checklistItemId": "check-2",
+      "completed": true,
+      "completedAt": "2025-08-08T10:35:00Z",
+      "updatedBy": "1"
+    },
+    {
+      "completed": true,
+      "completedAt": "2025-08-03T13:10:56.584Z",
+      "id": "status-3"
+    },
+    {
+      "id": "30bc",
+      "checklistItemId": "check-4",
+      "completed": true,
+      "completedAt": "2025-08-03T13:08:28.059Z"
+    },
+    {
+      "id": "cb20",
+      "checklistItemId": "f7f9",
+      "completed": true,
+      "completedAt": "2025-08-03T13:08:28.064Z"
+    }
+  ],
+  "houseCategoryStatus": [
+    {
+      "id": "cat-status-1",
+      "maison": "maison-1",
+      "categoryId": 1,
+      "isReady": true,
+      "readyAt": "2025-08-08T10:35:00Z"
+    },
+    {
+      "isReady": true,
+      "readyAt": "2025-08-03T13:09:42.334Z",
+      "id": "cat-status-2"
+    }
+  ],
+  "dashboardMetrics": [
+    {
+      "date": "2025-08-15",
+      "checkinToday": 2,
+      "checkoutToday": 1,
+      "maintenancesTodo": 2,
+      "housesReady": 8,
+      "paymentsCompleted": 15,
+      "paymentsOpen": 5,
+      "advancePayments": 8
+    }
+  ],
+  "occupancyData": [
+    {
+      "date": "2025-08-15",
+      "occupied": 4,
+      "free": 8
+    }
+  ],
+  "revenueData": [
+    {
+      "jour": "2025-08-01",
+      "revenus": 1200
+    },
+    {
+      "jour": "2025-08-02",
+      "revenus": 800
+    },
+    {
+      "jour": "2025-08-03",
+      "revenus": 1500
+    },
+    {
+      "jour": "2025-08-04",
+      "revenus": 1100
+    },
+    {
+      "jour": "2025-08-05",
+      "revenus": 900
+    },
+    {
+      "jour": "2025-08-06",
+      "revenus": 1300
+    },
+    {
+      "jour": "2025-08-07",
+      "revenus": 1600
+    },
+    {
+      "jour": "2025-08-08",
+      "revenus": 1000
+    },
+    {
+      "jour": "2025-08-09",
+      "revenus": 1200
+    },
+    {
+      "jour": "2025-08-10",
+      "revenus": 1400
+    },
+    {
+      "jour": "2025-08-11",
+      "revenus": 1100
+    },
+    {
+      "jour": "2025-08-12",
+      "revenus": 1800
+    },
+    {
+      "jour": "2025-08-13",
+      "revenus": 1300
+    },
+    {
+      "jour": "2025-08-14",
+      "revenus": 1500
+    },
+    {
+      "jour": "2025-08-15",
+      "revenus": 1700
+    }
+  ]
+}

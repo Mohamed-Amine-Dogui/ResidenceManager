@@ -39,6 +39,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Loading, LoadingInline, LoadingOverlay } from "@/components/ui/loading";
+import { checklistService } from "@/services";
+import type { ChecklistEntry as ApiChecklistEntry } from "@/types/api";
 
 const houses = [
   { id: "maison-1", name: "Mv1" },
@@ -237,21 +240,17 @@ const mockData = {
   ],
 };
 
-interface ChecklistEntry {
-  id: string;
-  maison: string;
-  etape: number;
-  categorie: string;
-  description: string;
-  produitAUtiliser: string;
-  type: string;
-}
+// Use the API type directly
+type ChecklistEntry = ApiChecklistEntry;
 
 export default function CheckListePage() {
   const [selectedHouse, setSelectedHouse] = useState<string>("maison-1");
-  const [checklistEntries, setChecklistEntries] = useState<ChecklistEntry[]>(
-    []
-  );
+  const [checklistEntries, setChecklistEntries] = useState<ChecklistEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
@@ -265,34 +264,40 @@ export default function CheckListePage() {
     type: "",
   });
 
-  // Initialize with mock data
+  // Load checklist entries from API
   useEffect(() => {
-    const initialEntries: ChecklistEntry[] = [];
-    let stepCounter = 1;
+    loadChecklistEntries();
+  }, [selectedHouse]);
 
-    mockData.categories.forEach((category) => {
-      category.steps.forEach((step) => {
-        initialEntries.push({
-          id: step.id.toString(),
-          maison: "maison-1", // Default to first house
-          etape: stepCounter++,
-          categorie: category.name,
-          description: step.description,
-          produitAUtiliser: step["produits a utilise"],
-          type: step.type,
-        });
+  const loadChecklistEntries = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const data = await checklistService.getChecklistItems(selectedHouse);
+      setChecklistEntries(data);
+      console.log('Loaded checklist entries:', data);
+    } catch (err) {
+      setError('Erreur lors du chargement de la checklist');
+      console.error('Error loading checklist entries:', err);
+      toast.error('Erreur', {
+        description: 'Impossible de charger la checklist'
       });
-    });
-
-    setChecklistEntries(initialEntries);
-  }, []);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredEntries = checklistEntries.filter(
     (entry) => entry.maison === selectedHouse
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (submitting || processing) {
+      return;
+    }
 
     if (
       !formData.etape ||
@@ -307,8 +312,7 @@ export default function CheckListePage() {
       return;
     }
 
-    const entryData: ChecklistEntry = {
-      id: editingEntry || Date.now().toString(),
+    const entryData: Omit<ChecklistEntry, 'id'> = {
       maison: selectedHouse,
       etape: Number.parseInt(formData.etape),
       categorie: formData.categorie,
@@ -317,21 +321,42 @@ export default function CheckListePage() {
       type: formData.type,
     };
 
-    if (editingEntry) {
-      setChecklistEntries((prev) =>
-        prev.map((entry) => (entry.id === editingEntry ? entryData : entry))
-      );
-      setEditingEntry(null);
-      toast.success("Étape mise à jour", {
-        description: "L'étape a été mise à jour avec succès",
-        duration: 700,
+    try {
+      setSubmitting(true);
+      setProcessing(true);
+
+      if (editingEntry) {
+        const updated = await checklistService.updateChecklistItem(editingEntry, entryData);
+        console.log('Updated checklist entry:', updated);
+        
+        // Optimistically update the local state
+        setChecklistEntries(prev => 
+          prev.map(entry => entry.id === editingEntry ? updated : entry)
+        );
+        setEditingEntry(null);
+        toast.success("Étape mise à jour", {
+          description: "L'étape a été mise à jour avec succès",
+          duration: 700,
+        });
+      } else {
+        const created = await checklistService.createChecklistItem(entryData);
+        console.log('Created checklist entry:', created);
+        
+        // Optimistically add to local state
+        setChecklistEntries(prev => [...prev, created]);
+        toast.success("Étape ajoutée avec succès", {
+          description: "La nouvelle étape a été ajoutée à la checklist",
+          duration: 700,
+        });
+      }
+    } catch (err) {
+      console.error('Error saving checklist entry:', err);
+      toast.error("Erreur", {
+        description: "Impossible de sauvegarder l'étape",
       });
-    } else {
-      setChecklistEntries((prev) => [...prev, entryData]);
-      toast.success("Étape ajoutée avec succès", {
-        description: "La nouvelle étape a été ajoutée à la checklist",
-        duration: 700,
-      });
+    } finally {
+      setSubmitting(false);
+      setProcessing(false);
     }
 
     // Reset form
@@ -360,15 +385,30 @@ export default function CheckListePage() {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (entryToDelete) {
-      setChecklistEntries((prev) =>
-        prev.filter((entry) => entry.id !== entryToDelete)
-      );
-      toast.success("Étape supprimée", {
-        description: "L'étape a été supprimée avec succès",
-        duration: 700,
-      });
+      try {
+        setDeleting(entryToDelete);
+        setProcessing(true);
+
+        await checklistService.deleteChecklistItem(entryToDelete);
+        
+        // Optimistically remove from local state
+        setChecklistEntries(prev => prev.filter(entry => entry.id !== entryToDelete));
+        
+        toast.success("Étape supprimée", {
+          description: "L'étape a été supprimée avec succès",
+          duration: 700,
+        });
+      } catch (err) {
+        console.error('Error deleting checklist entry:', err);
+        toast.error("Erreur", {
+          description: "Impossible de supprimer l'étape",
+        });
+      } finally {
+        setDeleting(null);
+        setProcessing(false);
+      }
     }
     setDeleteDialogOpen(false);
     setEntryToDelete(null);
@@ -387,6 +427,9 @@ export default function CheckListePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 p-6">
+      {/* Processing Overlay */}
+      {processing && <LoadingOverlay message="Traitement en cours..." />}
+      
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Header */}
         <div className="flex items-center space-x-2">
@@ -555,10 +598,15 @@ export default function CheckListePage() {
               <div className="flex justify-center space-x-2 pt-4">
                 <Button
                   type="submit"
+                  disabled={submitting}
                   className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {editingEntry ? "Modifier" : "Valider"}
+                  {submitting ? (
+                    <LoadingInline size={16} color="#ffffff" />
+                  ) : (
+                    <Plus className="mr-2 h-4 w-4" />
+                  )}
+                  {submitting ? "En cours..." : (editingEntry ? "Modifier" : "Valider")}
                 </Button>
                 {editingEntry && (
                   <Button
@@ -614,9 +662,32 @@ export default function CheckListePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredEntries
-                    .sort((a, b) => a.etape - b.etape)
-                    .map((entry) => (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <Loading message="Chargement de la checklist..." />
+                      </TableCell>
+                    </TableRow>
+                  ) : error ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <span className="text-red-600 dark:text-red-400">
+                          {error}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredEntries.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <span className="text-slate-600 dark:text-slate-400">
+                          Aucune étape trouvée pour cette maison
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredEntries
+                      .sort((a, b) => a.etape - b.etape)
+                      .map((entry) => (
                       <TableRow
                         key={entry.id}
                         className="border-slate-200 dark:border-slate-800"
@@ -635,9 +706,14 @@ export default function CheckListePage() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleDelete(entry.id)}
-                              className="border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-200 dark:hover:border-red-800"
+                              disabled={deleting === entry.id}
+                              className="border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-200 dark:hover:border-red-800 disabled:opacity-50"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              {deleting === entry.id ? (
+                                <LoadingInline size={16} color="#64748b" className="mr-0" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
                             </Button>
                           </div>
                         </TableCell>
@@ -670,7 +746,8 @@ export default function CheckListePage() {
                           </span>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      ))
+                  )}
                 </TableBody>
               </Table>
             </div>

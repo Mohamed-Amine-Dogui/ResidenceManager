@@ -1,7 +1,7 @@
 // src/pages/ReservationPage.tsx
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format, isWithinInterval, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon, Edit, Trash2, Check, X } from "lucide-react";
@@ -49,17 +49,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-
-interface Reservation {
-  id: string;
-  nom: string;
-  telephone: string;
-  email: string;
-  checkin: string;
-  checkout: string;
-  montantAvance: number;
-  maison: string;
-}
+import { reservationService } from "@/services";
+import type { Reservation, CreateReservation } from "@/types/api";
+import { Loading, LoadingInline, LoadingOverlay } from "@/components/ui/loading";
 
 const houses = [
   { id: "maison-1", name: "Mv1" },
@@ -76,34 +68,14 @@ const houses = [
   { id: "maison-high", name: "High" },
 ];
 
-// Mock data
-const initialReservations: Reservation[] = [
-  {
-    id: "1",
-    nom: "Jean Dupont",
-    telephone: "0123456789",
-    email: "jean.dupont@email.com",
-    checkin: "2025-07-15",
-    checkout: "2025-07-20",
-    montantAvance: 200,
-    maison: "maison-1",
-  },
-  {
-    id: "2",
-    nom: "Marie Martin",
-    telephone: "0987654321",
-    email: "marie.martin@email.com",
-    checkin: "2025-06-25",
-    checkout: "2025-07-02",
-    montantAvance: 150,
-    maison: "maison-1",
-  },
-];
-
 export default function ReservationPage() {
   const [selectedHouse, setSelectedHouse] = useState<string>("maison-1");
-  const [reservations, setReservations] =
-    useState<Reservation[]>(initialReservations);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedReservations, setSelectedReservations] = useState<string[]>(
     []
   );
@@ -128,9 +100,52 @@ export default function ReservationPage() {
     montantAvance: "",
   });
 
+  // Load reservations from API
+  useEffect(() => {
+    loadReservations();
+  }, [selectedHouse]);
+
+  // Debug component lifecycle
+  useEffect(() => {
+    console.log('🟢 ReservationPage MOUNTED');
+    console.log('Current URL:', window.location.href);
+    console.log('Current reservations:', reservations.length);
+    
+    return () => {
+      console.log('🔴 ReservationPage UNMOUNTED - This should NOT happen during operations!');
+      console.log('Current URL on unmount:', window.location.href);
+    };
+  }, []);
+
+  // Track state changes
+  useEffect(() => {
+    console.log('📊 State change - Loading:', loading, 'Processing:', processing, 'Submitting:', submitting);
+  }, [loading, processing, submitting]);
+
+  const loadReservations = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      // Load ALL reservations, not just for selected house
+      const data = await reservationService.getReservations();
+      setReservations(data);
+      console.log('Loaded reservations:', data);
+    } catch (err) {
+      setError('Erreur lors du chargement des réservations');
+      console.error('Error loading reservations:', err);
+      toast.error('Erreur', {
+        description: 'Impossible de charger les réservations'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredReservations = reservations.filter(
     (r) => r.maison === selectedHouse
   );
+  
+  console.log('Filtered reservations for', selectedHouse, ':', filteredReservations);
 
   const getBookedDates = () => {
     const bookedDates: Date[] = [];
@@ -183,16 +198,49 @@ export default function ReservationPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    console.log('🟡 handleSubmit called');
     e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('🟡 Form submit started - Event prevented');
+    console.log('🟡 Current URL before operation:', window.location.href);
+
+    // Prevent double submission
+    if (submitting || processing) {
+      console.log('🟡 Already submitting, ignoring');
+      return;
+    }
+
+    // Add detailed debugging for page navigation
+    const originalPushState = window.history.pushState;
+    const originalReplaceState = window.history.replaceState;
+    
+    window.history.pushState = function(data, title, url) {
+      console.log('🚨 HISTORY PUSH STATE CALLED:', { data, title, url });
+      return originalPushState.apply(window.history, [data, title, url]);
+    };
+    
+    window.history.replaceState = function(data, title, url) {
+      console.log('🚨 HISTORY REPLACE STATE CALLED:', { data, title, url });
+      return originalReplaceState.apply(window.history, [data, title, url]);
+    };
+
+    // Add page reload detection
+    const beforeUnloadHandler = () => {
+      console.log('🚨 PAGE IS ABOUT TO RELOAD! This should NOT happen!');
+      console.log('🚨 URL at reload:', window.location.href);
+    };
+    window.addEventListener('beforeunload', beforeUnloadHandler);
 
     if (
       !formData.nom ||
       !formData.checkin ||
-      !formData.checkout
+      !formData.checkout ||
+      (!formData.telephone && !formData.email)
     ) {
       toast.error("Failed", {
-        description: "Veuillez remplir tous les champs obligatoires",
+        description: "Veuillez remplir le nom, les dates et au moins un moyen de contact (téléphone ou email)",
       });
       return;
     }
@@ -204,8 +252,7 @@ export default function ReservationPage() {
       return;
     }
 
-    const reservationData = {
-      id: editingReservation || Date.now().toString(),
+    const reservationData: CreateReservation = {
       nom: formData.nom,
       telephone: formData.telephone,
       email: formData.email,
@@ -215,30 +262,72 @@ export default function ReservationPage() {
       maison: selectedHouse,
     };
 
-    if (editingReservation) {
-      setReservations((prev) =>
-        prev.map((r) => (r.id === editingReservation ? reservationData : r))
-      );
-      setEditingReservation(null);
-      toast.success("Réservation réussie", {
-        description: "La réservation a été mise à jour avec succès",
-      });
-    } else {
-      setReservations((prev) => [...prev, reservationData]);
-      toast.success("Réservation réussie", {
-        description: "La réservation a été créée avec succès",
-      });
-    }
+    try {
+      setSubmitting(true);
+      setProcessing(true);
 
-    // Reset form
-    setFormData({
-      nom: "",
-      telephone: "",
-      email: "",
-      checkin: undefined,
-      checkout: undefined,
-      montantAvance: "",
-    });
+      // Add small delay to make spinner visible
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      if (editingReservation) {
+        const updated = await reservationService.updateReservation(editingReservation, reservationData);
+        console.log('Updated reservation:', updated);
+        // Optimistically update the local state
+        setReservations(prev => {
+          const newState = prev.map(r => r.id === editingReservation ? updated : r);
+          console.log('New reservations state after update:', newState);
+          return newState;
+        });
+        setEditingReservation(null);
+        toast.success("Réservation réussie", {
+          description: "La réservation a été mise à jour avec succès",
+        });
+      } else {
+        const created = await reservationService.createReservation(reservationData);
+        console.log('Created reservation:', created);
+        // Optimistically add to local state
+        setReservations(prev => {
+          const newState = [...prev, created];
+          console.log('New reservations state after create:', newState);
+          return newState;
+        });
+        toast.success("Réservation réussie", {
+          description: "La réservation a été créée avec succès",
+        });
+      }
+
+      // Reset form
+      setFormData({
+        nom: "",
+        telephone: "",
+        email: "",
+        checkin: undefined,
+        checkout: undefined,
+        montantAvance: "",
+      });
+    } catch (err) {
+      console.error('❌ Error saving reservation:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : 'No stack trace'
+      });
+      toast.error("Erreur", {
+        description: "Impossible de sauvegarder la réservation",
+      });
+    } finally {
+      console.log('✅ Form submit completed - cleaning up states');
+      console.log('✅ Current URL after operation:', window.location.href);
+      
+      // Clean up event listeners
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+      
+      // Restore original history methods
+      window.history.pushState = originalPushState;
+      window.history.replaceState = originalReplaceState;
+      
+      setSubmitting(false);
+      setProcessing(false);
+    }
   };
 
   const handleEdit = (reservation: Reservation) => {
@@ -258,17 +347,39 @@ export default function ReservationPage() {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (reservationToDelete) {
-      setReservations((prev) =>
-        prev.filter((r) => r.id !== reservationToDelete)
-      );
-      setSelectedReservations((prev) =>
-        prev.filter((id) => id !== reservationToDelete)
-      );
-      toast.success("Réservation supprimée", {
-        description: "La réservation a été supprimée avec succès",
-      });
+      console.log('🔴 confirmDelete called for:', reservationToDelete);
+      console.log('🔴 Current URL before delete:', window.location.href);
+      
+      try {
+        setDeleting(reservationToDelete);
+        setProcessing(true);
+
+        // Add small delay to make spinner visible
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        await reservationService.deleteReservation(reservationToDelete);
+        
+        // Optimistically remove from local state
+        setReservations(prev => prev.filter(r => r.id !== reservationToDelete));
+        setSelectedReservations((prev) =>
+          prev.filter((id) => id !== reservationToDelete)
+        );
+        
+        toast.success("Réservation supprimée", {
+          description: "La réservation a été supprimée avec succès",
+        });
+      } catch (err) {
+        console.error('🔴 Error deleting reservation:', err);
+        toast.error("Erreur", {
+          description: "Impossible de supprimer la réservation",
+        });
+      } finally {
+        console.log('🔴 Delete completed - Current URL:', window.location.href);
+        setDeleting(null);
+        setProcessing(false);
+      }
     }
     setDeleteDialogOpen(false);
     setReservationToDelete(null);
@@ -284,6 +395,9 @@ export default function ReservationPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 p-6">
+      {/* Processing Overlay */}
+      {processing && <LoadingOverlay message="Traitement en cours..." />}
+      
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Header */}
         <div className="flex items-center space-x-2">
@@ -427,6 +541,9 @@ export default function ReservationPage() {
                     className="text-slate-700 dark:text-slate-300"
                   >
                     Téléphone
+                    <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
+                      (téléphone ou email requis)
+                    </span>
                   </Label>
                   <Input
                     id="telephone"
@@ -438,6 +555,7 @@ export default function ReservationPage() {
                       }))
                     }
                     className="border-slate-200 dark:border-slate-800"
+                    placeholder="Ex: +33123456789"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -446,6 +564,9 @@ export default function ReservationPage() {
                     className="text-slate-700 dark:text-slate-300"
                   >
                     Email
+                    <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
+                      (téléphone ou email requis)
+                    </span>
                   </Label>
                   <Input
                     id="email"
@@ -458,6 +579,7 @@ export default function ReservationPage() {
                       }))
                     }
                     className="border-slate-200 dark:border-slate-800"
+                    placeholder="Ex: client@email.com"
                   />
                 </div>
               </div>
@@ -554,10 +676,15 @@ export default function ReservationPage() {
               <div className="flex justify-center space-x-2 pt-4">
                 <Button
                   type="submit"
+                  disabled={submitting}
                   className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
                 >
-                  <Check className="mr-2 h-4 w-4" />
-                  {editingReservation ? "Modifier" : "Valider"}
+                  {submitting ? (
+                    <LoadingInline size={8} color="#ffffff" />
+                  ) : (
+                    <Check className="mr-2 h-4 w-4" />
+                  )}
+                  {submitting ? "En cours..." : (editingReservation ? "Modifier" : "Valider")}
                 </Button>
                 {editingReservation && (
                   <Button
@@ -625,10 +752,36 @@ export default function ReservationPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredReservations.map((reservation) => (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <Loading message="Chargement des réservations..." />
+                      </TableCell>
+                    </TableRow>
+                  ) : error ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <span className="text-red-600 dark:text-red-400">
+                          {error}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredReservations.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <span className="text-slate-600 dark:text-slate-400">
+                          Aucune réservation trouvée pour cette maison
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredReservations.map((reservation) => (
                     <TableRow
                       key={reservation.id}
-                      className="border-slate-200 dark:border-slate-800"
+                      className={cn(
+                        "border-slate-200 dark:border-slate-800",
+                        deleting === reservation.id && "opacity-50"
+                      )}
                     >
                       <TableCell>
                         <div className="flex space-x-2">
@@ -636,6 +789,7 @@ export default function ReservationPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleEdit(reservation)}
+                            disabled={deleting === reservation.id}
                             className="border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900"
                           >
                             <Edit className="h-4 w-4" />
@@ -644,9 +798,14 @@ export default function ReservationPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleDelete(reservation.id)}
+                            disabled={deleting === reservation.id}
                             className="border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-200 dark:hover:border-red-800"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {deleting === reservation.id ? (
+                              <LoadingInline size={16} color="#64748b" className="mr-0" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </TableCell>
@@ -674,7 +833,8 @@ export default function ReservationPage() {
                       </TableCell>
 
                     </TableRow>
-                  ))}
+                  ))
+                  )}
                 </TableBody>
               </Table>
             </div>

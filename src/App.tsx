@@ -18,32 +18,47 @@ import CheckinCheckoutPage from "./pages/CheckInOutPage";
 import DashBoardPage from "./pages/DashBoardPage";
 import MaintenancePage from "./pages/MaintenancePage";
 import FinancePage from "./pages/FinancePage";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+// Create router outside component to prevent re-creation
+const router = createHashRouter(
+  createRoutesFromElements(
+    <>
+      {/* Public routes (no Navbar) */}
+      <Route path="/" element={<PublicLayout />}>
+        <Route index element={<LoginPage />} />
+      </Route>
+
+      {/* Private routes (with Navbar) */}
+      <Route path="/" element={<PrivateLayout />}>
+        <Route path="/dashboard" element={<DashBoardPage />} />
+        <Route path="/reservation" element={<ReservationPage />} />
+        <Route path="/control" element={<ControlPage />} />
+        <Route path="/finance" element={<FinancePage />} />
+        <Route path="/maintenance" element={<MaintenancePage />} />
+        <Route path="/checkinout" element={<CheckinCheckoutPage />} />
+        <Route path="/checklist" element={<CheckListePage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </>
+  ),
+  {
+    // Add future flags to prevent warnings and improve stability
+    future: {
+      v7_startTransition: true,
+      v7_relativeSplatPath: true,
+    }
+  }
+);
 
 const App = () => {
-  const router = createHashRouter(
-    createRoutesFromElements(
-      <>
-        {/* Public routes (no Navbar) */}
-        <Route path="/" element={<PublicLayout />}>
-          <Route index element={<LoginPage />} />
-        </Route>
-
-        {/* Private routes (with Navbar) */}
-        <Route path="/" element={<PrivateLayout />}>
-          <Route path="/dashboard" element={<DashBoardPage />} />
-          <Route path="/reservation" element={<ReservationPage />} />
-          <Route path="/control" element={<ControlPage />} />
-          <Route path="/finance" element={<FinancePage />} />
-          <Route path="/maintenance" element={<MaintenancePage />} />
-          <Route path="/checkinout" element={<CheckinCheckoutPage />} />
-          <Route path="/checklist" element={<CheckListePage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </>
-    )
+  console.log('🚀 App component rendering - This should only appear ONCE!');
+  
+  return (
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
   );
-
-  return <RouterProvider router={router} />;
 };
 
 export default App;

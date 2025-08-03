@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Toaster, toast } from "sonner";
+import { Loading, LoadingInline, LoadingOverlay } from "@/components/ui/loading";
+import { checklistService } from "@/services";
 
 const houses = [
   { id: "maison-1", name: "Mv1" },
@@ -233,27 +235,60 @@ interface Category {
 export default function ControlPage() {
   const [selectedHouse, setSelectedHouse] = useState<string>("maison-1");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Initialize initializeCategories from mock data
-  
-  const initializeCategories = () => {
-    return mockData.categories.map((category) => ({
-      id: category.id,
-      name: category.name,
-      tasks: category.steps.map((step) => ({
-        id: step.id,
-        description: step.description,
-        produits: step["produits a utilise"],
-        completed: false,
-      })),
-      isReady: false,
-    }));
-  };
-
+  // Load categories from API
   useEffect(() => {
-    const initialCategories = initializeCategories();
-    setCategories(initialCategories);
+    loadChecklistProgress();
   }, [selectedHouse]);
+
+  const loadChecklistProgress = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const checklistItems = await checklistService.getChecklistItems(selectedHouse);
+      
+      // Group tasks by category
+      const categoriesMap = new Map<string, any[]>();
+      
+      checklistItems.forEach((item, index) => {
+        if (!categoriesMap.has(item.categorie)) {
+          categoriesMap.set(item.categorie, []);
+        }
+        categoriesMap.get(item.categorie)!.push({
+          id: item.etape || index + 1, // Use etape as ID or fallback to index
+          description: item.description,
+          produits: item.produitAUtiliser,
+          completed: false // Always start unchecked
+        });
+      });
+      
+      // Convert to Category format matching the original structure
+      const categoryData: Category[] = Array.from(categoriesMap.entries()).map(([name, tasks], index) => {
+        return {
+          id: index + 1, // Sequential ID for compatibility
+          name,
+          tasks: tasks.sort((a, b) => a.id - b.id),
+          isReady: false // Always start as not ready
+        };
+      });
+      
+      setCategories(categoryData);
+      console.log('Loaded checklist items:', checklistItems);
+    } catch (err) {
+      setError('Erreur lors du chargement du contrôle');
+      console.error('Error loading checklist items:', err);
+      toast.error('Erreur', {
+        description: 'Impossible de charger le contrôle qualité'
+      });
+      // Fallback to empty categories on error
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   
   // Calculate readiness percentage
@@ -278,6 +313,7 @@ export default function ControlPage() {
   ];
 
   const handleTaskToggle = (categoryId: number, taskId: number) => {
+    // Simple local state update only - no API calls to prevent page refresh
     setCategories((prev) =>
       prev.map((category) => {
         if (category.id === categoryId) {
@@ -293,6 +329,7 @@ export default function ControlPage() {
   };
 
   const handleMarkCategoryReady = (categoryId: number) => {
+    // Simple local state update only - no API calls to prevent page refresh
     setCategories((prev) =>
       prev.map((category) => {
         if (category.id === categoryId) {
@@ -416,8 +453,19 @@ export default function ControlPage() {
         </Card>
 
         {/* Category Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => (
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loading message="Chargement du contrôle qualité..." />
+          </div>
+        ) : error ? (
+          <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+            <CardContent className="text-center py-8">
+              <span className="text-red-600 dark:text-red-400">{error}</span>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {categories.map((category) => (
             <Card
               key={category.id}
               className={`border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 ${
@@ -483,8 +531,9 @@ export default function ControlPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <Toaster />
       </div>

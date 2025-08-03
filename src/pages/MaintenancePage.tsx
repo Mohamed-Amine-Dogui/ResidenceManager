@@ -67,6 +67,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import { Loading, LoadingInline, LoadingOverlay } from "@/components/ui/loading";
+import { maintenanceService } from "@/services";
+import type { MaintenanceIssue as ApiMaintenanceIssue, CreateMaintenanceIssue } from "@/types/api";
 
 const houses = [
   { id: "maison-1", name: "Mv1" },
@@ -91,20 +94,19 @@ const issueTypes = [
   { id: "autre", name: "Autre" },
 ];
 
-interface MaintenanceIssue {
-  id: string;
-  maison: string;
-  typePanne: string;
-  dateDeclaration: string;
-  assigne: string;
-  commentaire: string;
-  statut: "resolue" | "non-resolue";
+// Use the API type, but extend it for local file handling
+interface MaintenanceIssue extends Omit<ApiMaintenanceIssue, 'photoPanne' | 'photoFacture'> {
   photoPanne?: File | string;
   photoFacture?: File | string;
-  prixMainOeuvre?: number;
 }
 
 export default function MaintenancePage() {
+  const [issues, setIssues] = useState<MaintenanceIssue[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [editingIssue, setEditingIssue] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [issueToDelete, setIssueToDelete] = useState<string | null>(null);
@@ -137,34 +139,38 @@ export default function MaintenancePage() {
     dateDeclaration: undefined as Date | undefined,
   });
 
-  // Issues state
-  const [issues, setIssues] = useState<MaintenanceIssue[]>([]);
-
-  // Mock data initialization
+  // Load maintenance issues from API
   useEffect(() => {
-    const mockIssues: MaintenanceIssue[] = [
-      {
-        id: "1",
-        maison: "maison-1",
-        typePanne: "electricite",
-        dateDeclaration: "2025-01-15",
-        assigne: "Jean Dupont",
-        commentaire: "Prise électrique défaillante dans la cuisine",
-        statut: "non-resolue",
-      },
-      {
-        id: "2",
-        maison: "maison-2",
-        typePanne: "plomberie",
-        dateDeclaration: "2025-01-10",
-        assigne: "Marie Martin",
-        commentaire: "Fuite d'eau sous l'évier",
-        statut: "resolue",
-        prixMainOeuvre: 150,
-      },
-    ];
-    setIssues(mockIssues);
-  }, []);
+    loadIssues();
+  }, [filters.maison, filters.statut]);
+
+  const loadIssues = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Build filters for API call
+      const apiFilters: Parameters<typeof maintenanceService.getMaintenanceIssues>[0] = {};
+      
+      if (filters.maison !== 'all') {
+        apiFilters.houseId = filters.maison;
+      }
+      
+      apiFilters.status = filters.statut;
+      
+      const data = await maintenanceService.getMaintenanceIssues(apiFilters);
+      setIssues(data);
+      console.log('Loaded maintenance issues:', data);
+    } catch (err) {
+      setError('Erreur lors du chargement des pannes');
+      console.error('Error loading maintenance issues:', err);
+      toast.error('Erreur', {
+        description: 'Impossible de charger les pannes de maintenance'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredIssues = issues.filter((issue) => {
     const matchesStatus = issue.statut === filters.statut;
@@ -176,8 +182,12 @@ export default function MaintenancePage() {
     return matchesStatus && matchesHouse && matchesDate;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (submitting || processing) {
+      return;
+    }
 
     if (!formData.maison || !formData.typePanne || !formData.assigne) {
       toast.error("Erreur", {
@@ -187,40 +197,59 @@ export default function MaintenancePage() {
       return;
     }
 
-    const issueData: MaintenanceIssue = {
-      id: editingIssue || Date.now().toString(),
+    const issueData: CreateMaintenanceIssue = {
       maison: formData.maison,
       typePanne: formData.typePanne,
       dateDeclaration: format(formData.dateDeclaration, "yyyy-MM-dd"),
       assigne: formData.assigne,
       commentaire: formData.commentaire,
       statut: formData.statut,
-      photoPanne: formData.photoPanne || undefined,
-      photoFacture: formData.photoFacture || undefined,
-
+      photoPanne: typeof formData.photoPanne === 'string' ? formData.photoPanne : formData.photoPanne?.name,
+      photoFacture: typeof formData.photoFacture === 'string' ? formData.photoFacture : formData.photoFacture?.name,
       prixMainOeuvre: formData.prixMainOeuvre
         ? Number.parseFloat(formData.prixMainOeuvre)
         : undefined,
     };
 
-    if (editingIssue) {
-      setIssues((prev) =>
-        prev.map((issue) => (issue.id === editingIssue ? issueData : issue))
-      );
-      setEditingIssue(null);
-      toast.success("Panne mise à jour", {
-        description: "La panne a été mise à jour avec succès",
-        duration: 1000,
-      });
-    } else {
-      setIssues((prev) => [...prev, issueData]);
-      toast.success("Panne déclarée", {
-        description: "La nouvelle panne a été déclarée avec succès",
-        duration: 1000,
-      });
-    }
+    try {
+      setSubmitting(true);
+      setProcessing(true);
 
-    resetForm();
+      if (editingIssue) {
+        const updated = await maintenanceService.updateMaintenanceIssue(editingIssue, issueData);
+        console.log('Updated maintenance issue:', updated);
+        
+        // Optimistically update the local state
+        setIssues(prev => 
+          prev.map(issue => issue.id === editingIssue ? updated : issue)
+        );
+        setEditingIssue(null);
+        toast.success("Panne mise à jour", {
+          description: "La panne a été mise à jour avec succès",
+          duration: 1000,
+        });
+      } else {
+        const created = await maintenanceService.createMaintenanceIssue(issueData);
+        console.log('Created maintenance issue:', created);
+        
+        // Optimistically add to local state
+        setIssues(prev => [...prev, created]);
+        toast.success("Panne déclarée", {
+          description: "La nouvelle panne a été déclarée avec succès",
+          duration: 1000,
+        });
+      }
+
+      resetForm();
+    } catch (err) {
+      console.error('Error saving maintenance issue:', err);
+      toast.error("Erreur", {
+        description: "Impossible de sauvegarder la panne",
+      });
+    } finally {
+      setSubmitting(false);
+      setProcessing(false);
+    }
   };
 
   const resetForm = () => {
@@ -235,6 +264,40 @@ export default function MaintenancePage() {
       photoFacture: null,
       prixMainOeuvre: "",
     });
+  };
+
+  const handleDelete = (id: string) => {
+    setIssueToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (issueToDelete) {
+      try {
+        setDeleting(issueToDelete);
+        setProcessing(true);
+
+        await maintenanceService.deleteMaintenanceIssue(issueToDelete);
+        
+        // Optimistically remove from local state
+        setIssues(prev => prev.filter(issue => issue.id !== issueToDelete));
+        
+        toast.success("Panne supprimée", {
+          description: "La panne a été supprimée avec succès",
+          duration: 1000,
+        });
+      } catch (err) {
+        console.error('Error deleting maintenance issue:', err);
+        toast.error("Erreur", {
+          description: "Impossible de supprimer la panne",
+        });
+      } finally {
+        setDeleting(null);
+        setProcessing(false);
+      }
+    }
+    setDeleteDialogOpen(false);
+    setIssueToDelete(null);
   };
 
   const handleEdit = (issue: MaintenanceIssue) => {
@@ -253,22 +316,6 @@ export default function MaintenancePage() {
     setAccordionValue("form");
   };
 
-  const handleDelete = (id: string) => {
-    setIssueToDelete(id);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (issueToDelete) {
-      setIssues((prev) => prev.filter((issue) => issue.id !== issueToDelete));
-      toast.success("Panne supprimée", {
-        description: "La panne a été supprimée avec succès",
-        duration: 1000,
-      });
-    }
-    setDeleteDialogOpen(false);
-    setIssueToDelete(null);
-  };
 
   const handleFileUpload = (
     file: File | null,
@@ -289,6 +336,9 @@ export default function MaintenancePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 p-6">
+      {/* Processing Overlay */}
+      {processing && <LoadingOverlay message="Traitement en cours..." />}
+      
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Header */}
         <div className="flex items-center space-x-2">
@@ -577,10 +627,15 @@ export default function MaintenancePage() {
                     ) : (
                       <Button
                         type="submit"
+                        disabled={submitting}
                         className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
                       >
-                        <Check className="mr-2 h-4 w-4" />
-                        Valider
+                        {submitting ? (
+                          <LoadingInline size={16} color="#ffffff" />
+                        ) : (
+                          <Check className="mr-2 h-4 w-4" />
+                        )}
+                        {submitting ? "En cours..." : "Valider"}
                       </Button>
                     )}
                     <Button
@@ -732,7 +787,30 @@ export default function MaintenancePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredIssues.map((issue) => (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={filters.statut === "resolue" ? 10 : 8} className="text-center py-8">
+                        <Loading message="Chargement des pannes..." />
+                      </TableCell>
+                    </TableRow>
+                  ) : error ? (
+                    <TableRow>
+                      <TableCell colSpan={filters.statut === "resolue" ? 10 : 8} className="text-center py-8">
+                        <span className="text-red-600 dark:text-red-400">
+                          {error}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredIssues.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={filters.statut === "resolue" ? 10 : 8} className="text-center py-8">
+                        <span className="text-slate-600 dark:text-slate-400">
+                          Aucune panne trouvée pour cette maison
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredIssues.map((issue) => (
                     <TableRow
                       key={issue.id}
                       className="border-slate-200 dark:border-slate-800"
@@ -751,9 +829,14 @@ export default function MaintenancePage() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleDelete(issue.id)}
-                            className="border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-200 dark:hover:border-red-800"
+                            disabled={deleting === issue.id}
+                            className="border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-200 dark:hover:border-red-800 disabled:opacity-50"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {deleting === issue.id ? (
+                              <LoadingInline size={16} color="#64748b" className="mr-0" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </TableCell>
@@ -843,7 +926,8 @@ export default function MaintenancePage() {
                         </>
                       )}
                     </TableRow>
-                  ))}
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>

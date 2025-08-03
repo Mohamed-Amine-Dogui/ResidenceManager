@@ -1,7 +1,7 @@
 // src/pages/CheckInOutPage.tsx
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon, LogIn, LogOut, User } from "lucide-react";
@@ -33,6 +33,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Toaster, toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Loading, LoadingInline, LoadingOverlay } from "@/components/ui/loading";
+import { checkinService, reservationService } from "@/services";
+import type { CheckInData as ApiCheckInData, CreateCheckIn, InventaireType } from "@/types/api";
 import {
   Table,
   TableBody,
@@ -89,25 +92,16 @@ type CheckOutInventaireType = {
   [K in keyof InventaireType]: boolean;
 };
 
-interface CheckInData {
-  id: string;
-  maison: string;
-  nom: string;
-  telephone: string;
-  email: string;
-  dateArrivee: string;
-  dateDepart: string;
-  montantPaye: number;
-  montantRestant: number;
-  montantTotal: number;
-  inventaire: InventaireType;
-  responsable: string;
-  remarques: string;
-}
+// Use the API type directly
+type CheckInData = ApiCheckInData;
 
 export default function CheckInOutPage() {
   const [isCheckIn, setIsCheckIn] = useState(true);
   const [selectedHouse, setSelectedHouse] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [checkInData, setCheckInData] = useState({
     nom: "",
@@ -115,8 +109,8 @@ export default function CheckInOutPage() {
     email: "",
     dateArrivee: undefined as Date | undefined,
     dateDepart: undefined as Date | undefined,
-    montantPaye: "",
-    montantRestant: "",
+    avancePaye: "",
+    paiementCheckin: "",
     montantTotal: "",
     responsable: "",
     remarques: "",
@@ -163,7 +157,71 @@ export default function CheckInOutPage() {
 
   const [checkInRecords, setCheckInRecords] = useState<CheckInData[]>([]);
 
-  const handleCheckInSubmit = (e: React.FormEvent) => {
+  // Load check-in records from API when component mounts or house changes
+  useEffect(() => {
+    if (selectedHouse) {
+      loadCheckInRecords();
+    }
+  }, [selectedHouse]);
+
+  const loadCheckInRecords = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const records = await checkinService.getCheckins(selectedHouse);
+      setCheckInRecords(records);
+    } catch (err) {
+      setError('Erreur lors du chargement des check-ins');
+      console.error('Error loading check-ins:', err);
+      toast.error('Erreur', {
+        description: 'Impossible de charger les check-ins'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Auto-fill check-in data when name and date change
+  const handleAutoFill = async () => {
+    if (!checkInData.nom || !checkInData.dateArrivee || !selectedHouse) return;
+    
+    try {
+      const checkinDateStr = format(checkInData.dateArrivee, "yyyy-MM-dd");
+      const reservation = await reservationService.findReservationForCheckin(
+        checkInData.nom,
+        checkinDateStr,
+        selectedHouse
+      );
+      
+      if (reservation) {
+        setCheckInData(prev => ({
+          ...prev,
+          telephone: reservation.telephone,
+          email: reservation.email,
+          dateDepart: new Date(reservation.checkout),
+          avancePaye: reservation.montantAvance.toString(),
+        }));
+        
+        toast.success('Réservation trouvée', {
+          description: 'Les informations ont été pré-remplies',
+          duration: 2000,
+        });
+      }
+    } catch (err) {
+      console.error('Error searching reservation:', err);
+    }
+  };
+
+  // Trigger auto-fill when name or arrival date changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      handleAutoFill();
+    }, 500); // Debounce for 500ms
+    
+    return () => clearTimeout(timeoutId);
+  }, [checkInData.nom, checkInData.dateArrivee, selectedHouse]);
+
+  const handleCheckInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (
@@ -178,43 +236,60 @@ export default function CheckInOutPage() {
       return;
     }
 
-    const newCheckIn: CheckInData = {
-      id: Date.now().toString(),
-      maison: selectedHouse,
-      nom: checkInData.nom,
-      telephone: checkInData.telephone,
-      email: checkInData.email,
-      dateArrivee: format(checkInData.dateArrivee, "yyyy-MM-dd"),
-      dateDepart: format(checkInData.dateDepart, "yyyy-MM-dd"),
-      montantPaye: Number.parseFloat(checkInData.montantPaye) || 0,
-      montantRestant: Number.parseFloat(checkInData.montantRestant) || 0,
-      montantTotal: Number.parseFloat(checkInData.montantTotal) || 0,
-      inventaire,
-      responsable: checkInData.responsable,
-      remarques: checkInData.remarques,
-    };
+    if (submitting) return;
 
-    setCheckInRecords((prev) => [...prev, newCheckIn]);
+    try {
+      setSubmitting(true);
 
-    toast.success("Check-in enregistré avec succès", {
-      description: `État des lieux validé pour ${checkInData.nom}`,
-    });
+      const newCheckInData: CreateCheckIn = {
+        maison: selectedHouse,
+        nom: checkInData.nom,
+        telephone: checkInData.telephone,
+        email: checkInData.email,
+        dateArrivee: format(checkInData.dateArrivee, "yyyy-MM-dd"),
+        dateDepart: format(checkInData.dateDepart, "yyyy-MM-dd"),
+        avancePaye: Number.parseFloat(checkInData.avancePaye) || 0,
+        paiementCheckin: Number.parseFloat(checkInData.paiementCheckin) || 0,
+        montantTotal: (Number.parseFloat(checkInData.avancePaye) || 0) + (Number.parseFloat(checkInData.paiementCheckin) || 0),
+        inventaire,
+        responsable: checkInData.responsable,
+        remarques: checkInData.remarques,
+      };
 
-    setCheckInData({
-      nom: "",
-      telephone: "",
-      email: "",
-      dateArrivee: undefined,
-      dateDepart: undefined,
-      montantPaye: "",
-      montantRestant: "",
-      montantTotal: "",
-      responsable: "",
-      remarques: "",
-    });
+      const createdCheckIn = await checkinService.createCheckin(newCheckInData);
+
+      // Optimistically update local state
+      setCheckInRecords((prev) => [...prev, createdCheckIn]);
+
+      toast.success("Check-in enregistré avec succès", {
+        description: `État des lieux validé pour ${checkInData.nom}`,
+        duration: 2000,
+      });
+
+      // Reset form
+      setCheckInData({
+        nom: "",
+        telephone: "",
+        email: "",
+        dateArrivee: undefined,
+        dateDepart: undefined,
+        avancePaye: "",
+        paiementCheckin: "",
+        montantTotal: "",
+        responsable: "",
+        remarques: "",
+      });
+    } catch (err) {
+      console.error('Error creating check-in:', err);
+      toast.error("Erreur", {
+        description: "Impossible d'enregistrer le check-in",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleCheckOutSearch = () => {
+  const handleCheckOutSearch = async () => {
     if (!checkOutSearch.nom || !checkOutSearch.dateArrivee || !selectedHouse) {
       toast.error("Erreur", {
         description: "Veuillez remplir tous les champs de recherche",
@@ -222,31 +297,37 @@ export default function CheckInOutPage() {
       return;
     }
 
-    const found = checkInRecords.find(
-      (record) =>
-        record.nom.toLowerCase().includes(checkOutSearch.nom.toLowerCase()) &&
-        record.dateArrivee ===
-          format(checkOutSearch.dateArrivee!, "yyyy-MM-dd") &&
-        record.maison === selectedHouse
-    );
+    if (processing) return;
 
-    if (found) {
-      setFoundCheckIn(found);
+    try {
+      setProcessing(true);
 
-      const initialCheckOut: CheckOutInventaireType = {
-        litsSimples: false,
-        litsDoubles: false,
-        matelasSupplementaires: false,
-        oreillers: false,
-        tables: false,
-        chaises: false,
-        drapsPropres: false,
-        drapsHousse: false,
-        couvertures: false,
-        television: false,
-        telecommandeTv: false,
-        climatiseur: false,
-        telecommandeClimatiseur: false,
+      // Search in the loaded check-in records (which come from API)
+      const found = checkInRecords.find(
+        (record) =>
+          record.nom.toLowerCase().includes(checkOutSearch.nom.toLowerCase()) &&
+          record.dateArrivee ===
+            format(checkOutSearch.dateArrivee!, "yyyy-MM-dd") &&
+          record.maison === selectedHouse
+      );
+
+      if (found) {
+        setFoundCheckIn(found);
+
+        const initialCheckOut: CheckOutInventaireType = {
+          litsSimples: false,
+          litsDoubles: false,
+          matelasSupplementaires: false,
+          oreillers: false,
+          tables: false,
+          chaises: false,
+          drapsPropres: false,
+          drapsHousse: false,
+          couvertures: false,
+          television: false,
+          telecommandeTv: false,
+          climatiseur: false,
+          telecommandeClimatiseur: false,
         recepteurTv: false,
         telecommandeRecepteur: false,
         assiettes: false,
@@ -260,20 +341,28 @@ export default function CheckInOutPage() {
         balaiSerpilliere: false,
       };
 
-      setCheckOutInventaire(initialCheckOut);
-      setCheckOutView("verification");
+        setCheckOutInventaire(initialCheckOut);
+        setCheckOutView("verification");
 
-      toast.success("Enregistrement trouvé", {
-        description: `Check-in trouvé pour ${found.nom}`,
+        toast.success("Enregistrement trouvé", {
+          description: `Check-in trouvé pour ${found.nom}`,
+        });
+      } else {
+        toast.error("Aucun enregistrement trouvé", {
+          description: "Vérifiez les informations saisies",
+        });
+      }
+    } catch (err) {
+      console.error('Error searching check-in:', err);
+      toast.error("Erreur", {
+        description: "Impossible de rechercher le check-in",
       });
-    } else {
-      toast.error("Aucun enregistrement trouvé", {
-        description: "Vérifiez les informations saisies",
-      });
+    } finally {
+      setProcessing(false);
     }
   };
 
-  const handleCheckOutSubmit = () => {
+  const handleCheckOutSubmit = async () => {
     if (!foundCheckIn) return;
 
     const allItemsChecked = Object.values(checkOutInventaire).every(
@@ -288,24 +377,41 @@ export default function CheckInOutPage() {
       return;
     }
 
-    setCheckInRecords((prev) =>
-      prev.filter((record) => record.id !== foundCheckIn.id)
-    );
+    if (processing) return;
 
-    toast.success("Check-out enregistré", {
-      description: "La maison est maintenant disponible",
-    });
+    try {
+      setProcessing(true);
 
-    setCheckOutView("table");
-    setCheckOutSearch({
-      nom: "",
-      dateArrivee: undefined,
-    });
-    setFoundCheckIn(null);
-    setCheckOutInventaire({} as CheckOutInventaireType);
-    setCommentaireFinal("");
+      // Delete the check-in record from the backend
+      await checkinService.deleteCheckin(foundCheckIn.id);
 
-    setIsCheckIn(false);
+      // Optimistically update local state
+      setCheckInRecords((prev) =>
+        prev.filter((record) => record.id !== foundCheckIn.id)
+      );
+
+      toast.success("Check-out enregistré", {
+        description: "La maison est maintenant disponible",
+        duration: 2000,
+      });
+
+      // Reset checkout form
+      setCheckOutView("table");
+      setCheckOutSearch({
+        nom: "",
+        dateArrivee: undefined,
+      });
+      setFoundCheckIn(null);
+      setCheckOutInventaire({} as CheckOutInventaireType);
+      setCommentaireFinal("");
+    } catch (err) {
+      console.error('Error processing check-out:', err);
+      toast.error("Erreur", {
+        description: "Impossible de traiter le check-out",
+      });
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleCheckOutInventaireChange = (
@@ -530,15 +636,15 @@ export default function CheckInOutPage() {
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-2">
                     <Label className="text-slate-700 dark:text-slate-300">
-                      Montant payé
+                      Avance payé
                     </Label>
                     <Input
                       type="number"
-                      value={checkInData.montantPaye}
+                      value={checkInData.avancePaye}
                       onChange={(e) =>
                         setCheckInData((prev) => ({
                           ...prev,
-                          montantPaye: e.target.value,
+                          avancePaye: e.target.value,
                         }))
                       }
                       className="border-slate-200 dark:border-slate-800"
@@ -547,15 +653,15 @@ export default function CheckInOutPage() {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-slate-700 dark:text-slate-300">
-                      Montant restant
+                      Paiement au checkin
                     </Label>
                     <Input
                       type="number"
-                      value={checkInData.montantRestant}
+                      value={checkInData.paiementCheckin}
                       onChange={(e) =>
                         setCheckInData((prev) => ({
                           ...prev,
-                          montantRestant: e.target.value,
+                          paiementCheckin: e.target.value,
                         }))
                       }
                       className="border-slate-200 dark:border-slate-800"
@@ -568,14 +674,10 @@ export default function CheckInOutPage() {
                     </Label>
                     <Input
                       type="number"
-                      value={checkInData.montantTotal}
-                      onChange={(e) =>
-                        setCheckInData((prev) => ({
-                          ...prev,
-                          montantTotal: e.target.value,
-                        }))
-                      }
-                      className="border-slate-200 dark:border-slate-800"
+                      value={((Number.parseFloat(checkInData.avancePaye) || 0) + (Number.parseFloat(checkInData.paiementCheckin) || 0)).toString()}
+                      readOnly
+                      disabled
+                      className="border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
                       placeholder="0"
                     />
                   </div>
@@ -1118,9 +1220,14 @@ export default function CheckInOutPage() {
                 </div>
                 <Button
                   onClick={handleCheckInSubmit}
-                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
+                  disabled={submitting}
+                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200 disabled:opacity-50"
                 >
-                  Valider l'état des lieux
+                  {submitting ? (
+                    <LoadingInline size={16} color="#ffffff" />
+                  ) : (
+                    "Valider l'état des lieux"
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -1201,9 +1308,14 @@ export default function CheckInOutPage() {
                     </div>
                     <Button
                       onClick={handleCheckOutSearch}
-                      className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
+                      disabled={processing}
+                      className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200 disabled:opacity-50"
                     >
-                      Rechercher
+                      {processing ? (
+                        <LoadingInline size={16} color="#ffffff" />
+                      ) : (
+                        "Rechercher"
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
@@ -1240,21 +1352,39 @@ export default function CheckInOutPage() {
                               Date de départ
                             </TableHead>
                             <TableHead className="text-slate-700 dark:text-slate-300">
-                              Status paiement
-                            </TableHead>
-                            <TableHead className="text-slate-700 dark:text-slate-300">
                               Action
                             </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {checkInRecords
+                          {loading ? (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center py-8">
+                                <Loading message="Chargement des check-ins..." />
+                              </TableCell>
+                            </TableRow>
+                          ) : error ? (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center py-8">
+                                <span className="text-red-600 dark:text-red-400">
+                                  {error}
+                                </span>
+                              </TableCell>
+                            </TableRow>
+                          ) : checkInRecords
+                            .filter((record) => record.maison === selectedHouse)
+                            .length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center py-8">
+                                <span className="text-slate-600 dark:text-slate-400">
+                                  Aucun check-in pour cette maison
+                                </span>
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            checkInRecords
                             .filter((record) => record.maison === selectedHouse)
                             .map((record) => {
-                              const remainingAmount =
-                                record.montantTotal - record.montantPaye;
-                              const isFullyPaid = remainingAmount <= 0;
-
                               return (
                                 <TableRow
                                   key={record.id}
@@ -1275,17 +1405,6 @@ export default function CheckInOutPage() {
                                       new Date(record.dateDepart),
                                       "PPP",
                                       { locale: fr }
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {isFullyPaid ? (
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        Complet
-                                      </span>
-                                    ) : (
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                        Reste {remainingAmount}€
-                                      </span>
                                     )}
                                   </TableCell>
                                   <TableCell>
@@ -1330,7 +1449,8 @@ export default function CheckInOutPage() {
                                   </TableCell>
                                 </TableRow>
                               );
-                            })}
+                            })
+                          )}
                         </TableBody>
                       </Table>
                     </div>
@@ -1887,9 +2007,14 @@ export default function CheckInOutPage() {
 
                       <Button
                         onClick={handleCheckOutSubmit}
-                        className="w-full bg-sky-600 hover:bg-sky-700 dark:bg-sky-600 dark:hover:bg-sky-700"
+                        disabled={processing}
+                        className="w-full bg-sky-600 hover:bg-sky-700 dark:bg-sky-600 dark:hover:bg-sky-700 disabled:opacity-50"
                       >
-                        Valider le départ
+                        {processing ? (
+                          <LoadingInline size={16} color="#ffffff" />
+                        ) : (
+                          "Valider le départ"
+                        )}
                       </Button>
                     </CardContent>
                   </Card>
@@ -1898,6 +2023,9 @@ export default function CheckInOutPage() {
             )}
           </div>
         )}
+
+        {/* Processing Overlay */}
+        {processing && <LoadingOverlay message="Traitement en cours..." />}
 
         <Toaster />
       </div>
