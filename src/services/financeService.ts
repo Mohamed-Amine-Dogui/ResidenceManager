@@ -10,7 +10,7 @@ export const financeService = {
     month?: number;
     year?: number;
   }): Promise<FinancialOperation[]> => {
-    let endpoint = '/financialOperations';
+    let endpoint = '/api/v1/finance';
     const params = new URLSearchParams();
     
     if (filters?.houseId) params.append('maison', filters.houseId);
@@ -28,22 +28,22 @@ export const financeService = {
 
   // Get a specific financial operation
   getFinancialOperation: async (id: string): Promise<FinancialOperation> => {
-    return api.get<FinancialOperation>(`/financialOperations/${id}`);
+    return api.get<FinancialOperation>(`/api/v1/finance/${id}`);
   },
 
   // Create a new financial operation
   createFinancialOperation: async (operation: CreateFinancialOperation): Promise<FinancialOperation> => {
-    return api.post<FinancialOperation>('/financialOperations', operation);
+    return api.post<FinancialOperation>('/api/v1/finance', operation);
   },
 
   // Update a financial operation (only if editable)
   updateFinancialOperation: async (id: string, updates: Partial<CreateFinancialOperation>): Promise<FinancialOperation> => {
-    return api.put<FinancialOperation>(`/financialOperations/${id}`, updates);
+    return api.put<FinancialOperation>(`/api/v1/finance/${id}`, updates);
   },
 
   // Delete a financial operation
   deleteFinancialOperation: async (id: string): Promise<void> => {
-    return api.delete<void>(`/financialOperations/${id}`);
+    return api.delete<void>(`/api/v1/finance/${id}`);
   },
 
   // Get financial summary for a house
@@ -105,6 +105,7 @@ export const financeService = {
       motif: `Avance réservation - ${reservation.nom}`,
       montant: reservation.montantAvance,
       origine: 'reservation',
+      reservationId: reservation.id, // Add foreign key reference
       editable: false
     };
 
@@ -126,6 +127,7 @@ export const financeService = {
       motif: `Paiement accommodation - ${checkin.nom}`,
       montant: checkin.montantTotal,
       origine: 'checkin',
+      checkinId: checkin.id, // Add foreign key reference
       editable: false
     };
 
@@ -149,6 +151,7 @@ export const financeService = {
       motif: `Réparation ${maintenance.typePanne} - ${maintenance.assigne}`,
       montant: maintenance.prixMainOeuvre,
       origine: 'maintenance',
+      maintenanceId: maintenance.id, // Add foreign key reference
       pieceJointe: maintenance.photoFacture,
       editable: false
     };
@@ -172,5 +175,96 @@ export const financeService = {
       op.motif === filters.motif && 
       op.date === filters.date
     );
+  },
+
+  // Update reservation transaction when reservation is modified
+  updateReservationTransaction: async (reservation: {
+    id: string;
+    nom: string;
+    checkin: string;
+    montantAvance: number;
+    maison: string;
+  }): Promise<void> => {
+    console.log('🟡 Updating financial transaction for reservation:', reservation.id);
+    
+    // Get all financial operations to find the one related to this reservation
+    const allOperations = await financeService.getFinancialOperations();
+    
+    // Find the transaction with reservationId matching this reservation
+    const existingTransaction = allOperations.find(op => 
+      op.reservationId === reservation.id && op.origine === 'reservation'
+    );
+    
+    if (existingTransaction) {
+      console.log('🟡 Found existing transaction:', existingTransaction.id);
+      
+      // Update the transaction with new values
+      const updatedTransaction = {
+        date: reservation.checkin,
+        maison: reservation.maison,
+        motif: `Avance réservation - ${reservation.nom}`,
+        montant: reservation.montantAvance,
+      };
+      
+      await financeService.updateFinancialOperation(existingTransaction.id, updatedTransaction);
+      console.log('✅ Updated financial transaction:', existingTransaction.id);
+    } else {
+      console.log('⚠️  No existing transaction found for reservation:', reservation.id);
+      // If no transaction exists, create one
+      await financeService.createReservationTransaction(reservation);
+    }
+  },
+
+  // Delete reservation transaction when reservation is deleted
+  deleteReservationTransaction: async (reservationId: string): Promise<void> => {
+    console.log('🟡 Deleting financial transaction for reservation:', reservationId);
+    
+    // Get all financial operations to find the one related to this reservation
+    const allOperations = await financeService.getFinancialOperations();
+    
+    // Find the transaction with reservationId matching this reservation
+    const existingTransaction = allOperations.find(op => 
+      op.reservationId === reservationId && op.origine === 'reservation'
+    );
+    
+    if (existingTransaction) {
+      console.log('🟡 Found transaction to delete:', existingTransaction.id);
+      await financeService.deleteFinancialOperation(existingTransaction.id);
+      console.log('✅ Deleted financial transaction:', existingTransaction.id);
+    } else {
+      console.log('⚠️  No transaction found to delete for reservation:', reservationId);
+    }
+  },
+
+  // Delete checkin transaction when checkin is deleted  
+  deleteCheckinTransaction: async (checkinId: string): Promise<void> => {
+    console.log('🟡 Deleting financial transaction for checkin:', checkinId);
+    
+    const allOperations = await financeService.getFinancialOperations();
+    const existingTransaction = allOperations.find(op => 
+      op.checkinId === checkinId && op.origine === 'checkin'
+    );
+    
+    if (existingTransaction) {
+      console.log('🟡 Found checkin transaction to delete:', existingTransaction.id);
+      await financeService.deleteFinancialOperation(existingTransaction.id);
+      console.log('✅ Deleted checkin financial transaction:', existingTransaction.id);
+    }
+  },
+
+  // Delete maintenance transaction when maintenance is deleted
+  deleteMaintenanceTransaction: async (maintenanceId: string): Promise<void> => {
+    console.log('🟡 Deleting financial transaction for maintenance:', maintenanceId);
+    
+    const allOperations = await financeService.getFinancialOperations();
+    const existingTransaction = allOperations.find(op => 
+      op.maintenanceId === maintenanceId && op.origine === 'maintenance'
+    );
+    
+    if (existingTransaction) {
+      console.log('🟡 Found maintenance transaction to delete:', existingTransaction.id);
+      await financeService.deleteFinancialOperation(existingTransaction.id);
+      console.log('✅ Deleted maintenance financial transaction:', existingTransaction.id);
+    }
   }
 };

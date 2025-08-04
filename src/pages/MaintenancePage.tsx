@@ -182,8 +182,25 @@ export default function MaintenancePage() {
     return matchesStatus && matchesHouse && matchesDate;
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    // CRITICAL FIX FOR VITE + JSON SERVER PAGE REFRESH ISSUE:
+    // Apply the same comprehensive fix as ReservationPage
+    
+    // Step 1: IMMEDIATE prevention - before ANY other code
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Step 2: Additional safeguards for Vite dev environment
+    if (e.nativeEvent) {
+      e.nativeEvent.preventDefault();
+      e.nativeEvent.stopPropagation();
+    }
+    
+    // Step 3: Return early if event is not properly formed (Vite HMR issue)
+    if (!e || !e.currentTarget) {
+      console.warn('🟡 Invalid form event detected - this is a Vite/HMR issue');
+      return;
+    }
 
     if (submitting || processing) {
       return;
@@ -298,6 +315,14 @@ export default function MaintenancePage() {
 
         await maintenanceService.deleteMaintenanceIssue(issueToDelete);
         
+        // Delete the corresponding financial transaction if it exists
+        try {
+          await financeService.deleteMaintenanceTransaction(issueToDelete);
+          console.log('✅ Deleted financial transaction for maintenance:', issueToDelete);
+        } catch (transactionErr) {
+          console.error('⚠️  Error deleting financial transaction (non-blocking):', transactionErr);
+        }
+        
         // Optimistically remove from local state
         setIssues(prev => prev.filter(issue => issue.id !== issueToDelete));
         
@@ -391,7 +416,19 @@ export default function MaintenancePage() {
             </AccordionTrigger>
             <AccordionContent className="bg-white dark:bg-slate-950 border-x border-b border-slate-200 dark:border-slate-800 rounded-b-lg">
               <div className="p-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form 
+                  onSubmit={handleSubmit} 
+                  className="space-y-4"
+                  noValidate
+                  autoComplete="off"
+                  // Additional form attributes to prevent issues in Vite environment
+                  method="POST"
+                  action="#"
+                  onReset={(e) => {
+                    e.preventDefault();
+                    console.log('🟡 Form reset prevented');
+                  }}
+                >
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label className="text-slate-700 dark:text-slate-300">
@@ -447,6 +484,7 @@ export default function MaintenancePage() {
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
+                            type="button"
                             variant="outline"
                             className="w-full justify-start text-left font-normal border-slate-200 dark:border-slate-800 bg-transparent"
                           >
@@ -837,6 +875,7 @@ export default function MaintenancePage() {
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button
+                            type="button"
                             size="sm"
                             variant="outline"
                             onClick={() => handleEdit(issue)}
@@ -845,6 +884,7 @@ export default function MaintenancePage() {
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
+                            type="button"
                             size="sm"
                             variant="outline"
                             onClick={() => handleDelete(issue.id)}

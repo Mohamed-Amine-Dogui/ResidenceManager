@@ -33,8 +33,26 @@ export default function LoginPage() {
     navigate("/dashboard");
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    // CRITICAL FIX FOR VITE + JSON SERVER PAGE REFRESH ISSUE:
+    // Apply the same comprehensive fix as ReservationPage
+    
+    // Step 1: IMMEDIATE prevention - before ANY other code
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Step 2: Additional safeguards for Vite dev environment
+    if (e.nativeEvent) {
+      e.nativeEvent.preventDefault();
+      e.nativeEvent.stopPropagation();
+    }
+    
+    // Step 3: Return early if event is not properly formed (Vite HMR issue)
+    if (!e || !e.currentTarget) {
+      console.warn('🟡 Invalid form event detected - this is a Vite/HMR issue');
+      return;
+    }
+
     // Handle login logic
     console.log("Login attempt:", { email, password });
   };
@@ -97,6 +115,7 @@ export default function LoginPage() {
 
               <div className="flex justify-between gap-4">
                 <Button
+                  type="button"
                   onClick={handleGuestVisit}
                   variant="outline"
                   className="flex-1 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 bg-transparent"
@@ -104,6 +123,7 @@ export default function LoginPage() {
                   Visiter en tant qu'invité
                 </Button>
                 <Button
+                  type="button"
                   onClick={() => setShowLoginForm(true)}
                   className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
                 >
@@ -113,7 +133,19 @@ export default function LoginPage() {
             ) : (
               // Login form
               <div className="space-y-6">
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form 
+                  onSubmit={handleLogin} 
+                  className="space-y-4"
+                  noValidate
+                  autoComplete="off"
+                  // Additional form attributes to prevent issues in Vite environment
+                  method="POST"
+                  action="#"
+                  onReset={(e) => {
+                    e.preventDefault();
+                    console.log('🟡 Form reset prevented');
+                  }}
+                >
                   <div className="space-y-2">
                     <Label
                       htmlFor="email"
@@ -186,6 +218,7 @@ export default function LoginPage() {
 
                   <div className="grid grid-cols-1 gap-3">
                     <Button
+                      type="button"
                       onClick={handleGoogleLogin}
                       variant="outline"
                       className="w-full border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 bg-transparent"
@@ -211,6 +244,7 @@ export default function LoginPage() {
                       Connexion avec Google
                     </Button>
                     <Button
+                      type="button"
                       onClick={handleFacebookLogin}
                       variant="outline"
                       className="w-full border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 bg-transparent"
@@ -240,6 +274,7 @@ export default function LoginPage() {
                 {/* Back button */}
                 <div className="text-center pt-4">
                   <Button
+                    type="button"
                     onClick={() => setShowLoginForm(false)}
                     variant="ghost"
                     className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"

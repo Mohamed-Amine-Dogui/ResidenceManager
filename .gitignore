@@ -24,3 +24,10 @@ README.md
 *.njsproj
 *.sln
 *.sw?
+
+# Python-related
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

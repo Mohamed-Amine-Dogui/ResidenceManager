@@ -21,6 +21,10 @@ export interface FinancialOperation {
   origine: "reservation" | "maintenance" | "checkin" | "manuel";
   pieceJointe?: string;
   editable: boolean;
+  // Foreign key references for transaction synchronization
+  reservationId?: string;
+  checkinId?: string;
+  maintenanceId?: string;
 }
 
 export interface MaintenanceIssue {
@@ -171,6 +175,10 @@ export interface CreateFinancialOperation {
   origine: "reservation" | "maintenance" | "checkin" | "manuel";
   pieceJointe?: string;
   editable?: boolean;
+  // Foreign key references for transaction synchronization
+  reservationId?: string;
+  checkinId?: string;
+  maintenanceId?: string;
 }
 
 export interface CreateMaintenanceIssue {

@@ -5,29 +5,29 @@ export const reservationService = {
   // Get all reservations with optional house filter
   getReservations: async (houseId?: string): Promise<Reservation[]> => {
     const endpoint = houseId 
-      ? `/reservations?maison=${houseId}` 
-      : '/reservations';
+      ? `/api/v1/reservations?maison=${houseId}` 
+      : '/api/v1/reservations';
     return api.get<Reservation[]>(endpoint);
   },
 
   // Get a specific reservation by ID
   getReservation: async (id: string): Promise<Reservation> => {
-    return api.get<Reservation>(`/reservations/${id}`);
+    return api.get<Reservation>(`/api/v1/reservations/${id}`);
   },
 
   // Create a new reservation
   createReservation: async (reservation: CreateReservation): Promise<Reservation> => {
-    return api.post<Reservation>('/reservations', reservation);
+    return api.post<Reservation>('/api/v1/reservations', reservation);
   },
 
   // Update an existing reservation
   updateReservation: async (id: string, updates: UpdateReservation): Promise<Reservation> => {
-    return api.put<Reservation>(`/reservations/${id}`, updates);
+    return api.put<Reservation>(`/api/v1/reservations/${id}`, updates);
   },
 
   // Delete a reservation
   deleteReservation: async (id: string): Promise<void> => {
-    return api.delete<void>(`/reservations/${id}`);
+    return api.delete<void>(`/api/v1/reservations/${id}`);
   },
 
   // Check for date conflicts (useful for validation)

@@ -101,7 +101,10 @@ return (
               return (
                 <Tooltip key={item.id}>
                   <TooltipTrigger asChild>
+                    {/* CRITICAL: type="button" prevents these navigation buttons from 
+                        causing form submissions when clicked while forms are active */}
                     <Button
+                      type="button"
                       variant={isActive ? "default" : "ghost"}
                       size="sm"
                       className={`h-9 w-9 shrink-0 ${

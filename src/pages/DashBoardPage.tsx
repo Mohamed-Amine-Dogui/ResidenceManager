@@ -41,7 +41,11 @@ import {
 import { ChartTooltip } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { dashboardService } from "@/services";
-import type { DashboardMetrics, OccupancyData, RevenueDataPoint } from "@/types/api";
+import type {
+  DashboardMetrics,
+  OccupancyData,
+  RevenueDataPoint,
+} from "@/types/api";
 import { LoadingOverlay } from "@/components/ui/loading";
 import { Toaster, toast } from "sonner";
 
@@ -62,25 +66,29 @@ export default function HomePage() {
     try {
       setLoading(true);
       setError(null);
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      
+      const dateStr = format(selectedDate, "yyyy-MM-dd");
+
       // Load each data type separately from db.json
       const [metricsData, occupancyData, revenueData] = await Promise.all([
         dashboardService.getDashboardMetrics(dateStr),
-        dashboardService.getOccupancyData(dateStr), 
-        dashboardService.getRevenueData()
+        dashboardService.getOccupancyData(dateStr),
+        dashboardService.getRevenueData(),
       ]);
-      
+
       setMetrics(metricsData);
       setOccupancy(occupancyData);
       setRevenue(revenueData);
-      
-      console.log('Dashboard data loaded:', { metricsData, occupancyData, revenueData });
+
+      console.log("Dashboard data loaded:", {
+        metricsData,
+        occupancyData,
+        revenueData,
+      });
     } catch (err) {
-      setError('Erreur lors du chargement des données');
-      console.error('Error loading dashboard data:', err);
-      toast.error('Erreur', {
-        description: 'Impossible de charger les données du tableau de bord'
+      setError("Erreur lors du chargement des données");
+      console.error("Error loading dashboard data:", err);
+      toast.error("Erreur", {
+        description: "Impossible de charger les données du tableau de bord",
       });
     } finally {
       setLoading(false);
@@ -146,15 +154,18 @@ export default function HomePage() {
   ];
 
   // Area chart data from API or defaults
-  const revenueData = revenue.length > 0 ? revenue : [
-    { jour: "1", revenus: 0 },
-    { jour: "5", revenus: 0 },
-    { jour: "10", revenus: 0 },
-    { jour: "15", revenus: 0 },
-    { jour: "20", revenus: 0 },
-    { jour: "25", revenus: 0 },
-    { jour: "30", revenus: 0 },
-  ];
+  const revenueData =
+    revenue.length > 0
+      ? revenue
+      : [
+          { jour: "1", revenus: 0 },
+          { jour: "5", revenus: 0 },
+          { jour: "10", revenus: 0 },
+          { jour: "15", revenus: 0 },
+          { jour: "20", revenus: 0 },
+          { jour: "25", revenus: 0 },
+          { jour: "30", revenus: 0 },
+        ];
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 p-6">
@@ -303,8 +314,11 @@ export default function HomePage() {
                     {(() => {
                       if (!occupancy) return 0;
                       const total = occupancy.occupied + occupancy.free;
-                      return total > 0 ? Math.round((occupancy.occupied / total) * 100) : 0;
-                    })()}%
+                      return total > 0
+                        ? Math.round((occupancy.occupied / total) * 100)
+                        : 0;
+                    })()}
+                    %
                   </span>{" "}
                   d'occupation
                 </p>
@@ -409,8 +423,8 @@ export default function HomePage() {
             </CardContent>
           </Card>
         </div>
-        
       </div>
+      <Toaster />
     </div>
   );
 }

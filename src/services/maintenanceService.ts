@@ -7,7 +7,7 @@ export const maintenanceService = {
     houseId?: string;
     status?: 'resolue' | 'non-resolue';
   }): Promise<MaintenanceIssue[]> => {
-    let endpoint = '/maintenanceIssues';
+    let endpoint = '/api/v1/maintenance';
     const params = new URLSearchParams();
     
     if (filters?.houseId) params.append('maison', filters.houseId);
@@ -22,27 +22,27 @@ export const maintenanceService = {
 
   // Get a specific maintenance issue
   getMaintenanceIssue: async (id: string): Promise<MaintenanceIssue> => {
-    return api.get<MaintenanceIssue>(`/maintenanceIssues/${id}`);
+    return api.get<MaintenanceIssue>(`/api/v1/maintenance/${id}`);
   },
 
   // Get all maintenance types
   getMaintenanceTypes: async (): Promise<MaintenanceType[]> => {
-    return api.get<MaintenanceType[]>('/maintenanceTypes');
+    return api.get<MaintenanceType[]>('/api/v1/maintenance/types');
   },
 
   // Create a new maintenance issue
   createMaintenanceIssue: async (issue: CreateMaintenanceIssue): Promise<MaintenanceIssue> => {
-    return api.post<MaintenanceIssue>('/maintenanceIssues', issue);
+    return api.post<MaintenanceIssue>('/api/v1/maintenance', issue);
   },
 
   // Update a maintenance issue
   updateMaintenanceIssue: async (id: string, updates: Partial<CreateMaintenanceIssue>): Promise<MaintenanceIssue> => {
-    return api.put<MaintenanceIssue>(`/maintenanceIssues/${id}`, updates);
+    return api.put<MaintenanceIssue>(`/api/v1/maintenance/${id}`, updates);
   },
 
   // Delete a maintenance issue
   deleteMaintenanceIssue: async (id: string): Promise<void> => {
-    return api.delete<void>(`/maintenanceIssues/${id}`);
+    return api.delete<void>(`/api/v1/maintenance/${id}`);
   },
 
   // Mark issue as resolved

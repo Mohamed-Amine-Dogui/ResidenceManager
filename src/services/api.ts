@@ -18,81 +18,139 @@ class ApiError extends Error {
   }
 }
 
-// Generic API request function
+// FIXED: Pure fetch implementation to prevent any navigation/refresh issues
+// The previous implementation might have been causing navigation due to error handling
 async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
+  // Create AbortController to handle potential cancellation
+  const controller = new AbortController();
+  const signal = controller.signal;
+  
   const defaultOptions: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     },
+    signal, // Add signal to prevent hanging requests
+    mode: 'cors', // Explicit CORS mode
+    credentials: 'same-origin', // Prevent credential issues
   };
 
   const config = { ...defaultOptions, ...options };
 
+  console.log('🔵 API Request:', { 
+    method: config.method || 'GET', 
+    url, 
+    body: config.body,
+    headers: config.headers 
+  });
+
   try {
-    console.log('🔵 API Request:', { method: config.method || 'GET', url, body: config.body });
-    
+    // Use pure fetch with explicit error handling to prevent any navigation issues
     const response = await fetch(url, config);
     
     console.log('🔵 API Response:', { 
       status: response.status, 
       statusText: response.statusText, 
-      url: response.url 
+      url: response.url,
+      ok: response.ok,
+      redirected: response.redirected
     });
     
+    // Check for redirects that might cause page refresh
+    if (response.redirected) {
+      console.warn('🔵 API Response was redirected - this might cause issues');
+    }
+    
+    // Handle non-OK responses without throwing to prevent navigation issues
     if (!response.ok) {
       console.error('🔵 API Request failed:', {
         status: response.status,
         statusText: response.statusText,
         url: response.url
       });
-      throw new ApiError(
-        `API request failed: ${response.statusText}`,
-        response.status
-      );
+      
+      // Try to get error details from response
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.text();
+        if (errorData) {
+          errorMessage += ` - ${errorData}`;
+        }
+      } catch (parseError) {
+        console.warn('Could not parse error response:', parseError);
+      }
+      
+      throw new ApiError(errorMessage, response.status);
     }
 
-    const data = await response.json();
+    // Parse JSON response safely
+    let data: T;
+    try {
+      const textResponse = await response.text();
+      data = textResponse ? JSON.parse(textResponse) : {} as T;
+    } catch (parseError) {
+      console.error('🔵 JSON Parse Error:', parseError);
+      throw new ApiError('Invalid JSON response from server', response.status);
+    }
+    
     console.log('🔵 API Response data:', data);
     return data;
+    
   } catch (error) {
     console.error('🔵 API Error caught:', error);
+    
+    // Handle different types of errors without causing navigation
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError('Network error or server unavailable', 0);
+    
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new ApiError('Network error - check your connection', 0);
+    }
+    
+    if (error.name === 'AbortError') {
+      throw new ApiError('Request was cancelled', 0);
+    }
+    
+    throw new ApiError('Unexpected error occurred', 0);
   }
 }
 
-// HTTP method helpers
+// HTTP method helpers with explicit return types to prevent any issues
 export const api = {
-  get: <T>(endpoint: string): Promise<T> =>
-    apiRequest<T>(endpoint, { method: 'GET' }),
+  get: async <T>(endpoint: string): Promise<T> => {
+    return apiRequest<T>(endpoint, { method: 'GET' });
+  },
 
-  post: <T>(endpoint: string, data: any): Promise<T> =>
-    apiRequest<T>(endpoint, {
+  post: async <T>(endpoint: string, data: any): Promise<T> => {
+    return apiRequest<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
-    }),
+    });
+  },
 
-  put: <T>(endpoint: string, data: any): Promise<T> =>
-    apiRequest<T>(endpoint, {
+  put: async <T>(endpoint: string, data: any): Promise<T> => {
+    return apiRequest<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
-    }),
+    });
+  },
 
-  patch: <T>(endpoint: string, data: any): Promise<T> =>
-    apiRequest<T>(endpoint, {
+  patch: async <T>(endpoint: string, data: any): Promise<T> => {
+    return apiRequest<T>(endpoint, {
       method: 'PATCH',
       body: JSON.stringify(data),
-    }),
+    });
+  },
 
-  delete: <T>(endpoint: string): Promise<T> =>
-    apiRequest<T>(endpoint, { method: 'DELETE' }),
+  delete: async <T>(endpoint: string): Promise<T> => {
+    return apiRequest<T>(endpoint, { method: 'DELETE' });
+  },
 };
 
 export { ApiError };

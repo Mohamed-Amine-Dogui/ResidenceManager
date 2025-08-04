@@ -171,87 +171,119 @@ export default function ReservationPage() {
   };
 
   const isDateRangeAvailable = (checkin: Date, checkout: Date) => {
-    if (editingReservation) {
-      // Exclude current reservation when editing
-      const otherReservations = filteredReservations.filter(
-        (r) => r.id !== editingReservation
-      );
-      return !otherReservations.some((reservation) => {
-        const start = parseISO(reservation.checkin);
-        const end = parseISO(reservation.checkout);
-        return (
-          isWithinInterval(checkin, { start, end }) ||
-          isWithinInterval(checkout, { start, end }) ||
-          (checkin <= start && checkout >= end)
-        );
-      });
-    }
+    try {
+      if (!checkin || !checkout) {
+        return false;
+      }
 
-    return !filteredReservations.some((reservation) => {
-      const start = parseISO(reservation.checkin);
-      const end = parseISO(reservation.checkout);
-      return (
-        isWithinInterval(checkin, { start, end }) ||
-        isWithinInterval(checkout, { start, end }) ||
-        (checkin <= start && checkout >= end)
-      );
-    });
+      if (editingReservation) {
+        // Exclude current reservation when editing
+        const otherReservations = filteredReservations.filter(
+          (r) => r.id !== editingReservation
+        );
+        return !otherReservations.some((reservation) => {
+          try {
+            const start = parseISO(reservation.checkin);
+            const end = parseISO(reservation.checkout);
+            return (
+              isWithinInterval(checkin, { start, end }) ||
+              isWithinInterval(checkout, { start, end }) ||
+              (checkin <= start && checkout >= end)
+            );
+          } catch (parseError) {
+            console.error('Error parsing reservation dates:', parseError, reservation);
+            return false; // Assume available if we can't parse dates
+          }
+        });
+      }
+
+      return !filteredReservations.some((reservation) => {
+        try {
+          const start = parseISO(reservation.checkin);
+          const end = parseISO(reservation.checkout);
+          return (
+            isWithinInterval(checkin, { start, end }) ||
+            isWithinInterval(checkout, { start, end }) ||
+            (checkin <= start && checkout >= end)
+          );
+        } catch (parseError) {
+          console.error('Error parsing reservation dates:', parseError, reservation);
+          return false; // Assume available if we can't parse dates
+        }
+      });
+    } catch (error) {
+      console.error('Error in isDateRangeAvailable:', error);
+      return false; // Default to not available if there's an error
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     console.log('🟡 handleSubmit called');
+    
+    // CRITICAL FIX FOR VITE + JSON SERVER PAGE REFRESH ISSUE:
+    // Research shows this is a common issue with Vite dev server + JSON server + React forms.
+    // The issue occurs due to HMR, proxy conflicts, and React Router interactions.
+    // Solution: Immediate preventDefault + additional safeguards for Vite environment.
+    
+    // Step 1: IMMEDIATE prevention - before ANY other code
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🟡 Form submit started - Event prevented');
+    // Step 2: Additional safeguards for Vite dev environment
+    if (e.nativeEvent) {
+      e.nativeEvent.preventDefault();
+      e.nativeEvent.stopPropagation();
+    }
+    
+    // Step 3: Return early if event is not properly formed (Vite HMR issue)
+    if (!e || !e.currentTarget) {
+      console.warn('🟡 Invalid form event detected - this is a Vite/HMR issue');
+      return;
+    }
+    
+    console.log('🟡 Form submit started - All default behaviors prevented');
     console.log('🟡 Current URL before operation:', window.location.href);
+    console.log('🟡 Event details:', { 
+      type: e.type, 
+      target: e.target?.tagName, 
+      currentTarget: e.currentTarget?.tagName 
+    });
 
-    // Prevent double submission
+    // Step 2: Early return for double submission (after preventDefault)
     if (submitting || processing) {
       console.log('🟡 Already submitting, ignoring');
-      return;
+      return; // Return void, form submission already prevented
     }
 
-    // Add detailed debugging for page navigation
-    const originalPushState = window.history.pushState;
-    const originalReplaceState = window.history.replaceState;
-    
-    window.history.pushState = function(data, title, url) {
-      console.log('🚨 HISTORY PUSH STATE CALLED:', { data, title, url });
-      return originalPushState.apply(window.history, [data, title, url]);
-    };
-    
-    window.history.replaceState = function(data, title, url) {
-      console.log('🚨 HISTORY REPLACE STATE CALLED:', { data, title, url });
-      return originalReplaceState.apply(window.history, [data, title, url]);
-    };
+    // Step 3: Form validation with safe error handling
+    try {
+      if (
+        !formData.nom ||
+        !formData.checkin ||
+        !formData.checkout ||
+        (!formData.telephone && !formData.email)
+      ) {
+        toast.error("Failed", {
+          description: "Veuillez remplir le nom, les dates et au moins un moyen de contact (téléphone ou email)",
+        });
+        return; // Return void, form already prevented
+      }
 
-    // Add page reload detection
-    const beforeUnloadHandler = () => {
-      console.log('🚨 PAGE IS ABOUT TO RELOAD! This should NOT happen!');
-      console.log('🚨 URL at reload:', window.location.href);
-    };
-    window.addEventListener('beforeunload', beforeUnloadHandler);
-
-    if (
-      !formData.nom ||
-      !formData.checkin ||
-      !formData.checkout ||
-      (!formData.telephone && !formData.email)
-    ) {
-      toast.error("Failed", {
-        description: "Veuillez remplir le nom, les dates et au moins un moyen de contact (téléphone ou email)",
+      if (!isDateRangeAvailable(formData.checkin, formData.checkout)) {
+        toast.error("Failed", {
+          description: "La maison est déjà réservée dans cette période",
+        });
+        return; // Return void, form already prevented
+      }
+    } catch (validationError) {
+      console.error('Validation error:', validationError);
+      toast.error("Erreur", {
+        description: "Erreur de validation des données",
       });
-      return;
+      return; // Return void, form already prevented
     }
 
-    if (!isDateRangeAvailable(formData.checkin, formData.checkout)) {
-      toast.error("Failed", {
-        description: "La maison est déjà réservée dans cette période",
-      });
-      return;
-    }
-
+    // Step 4: Prepare reservation data (after all validation passes)
     const reservationData: CreateReservation = {
       nom: formData.nom,
       telephone: formData.telephone,
@@ -262,59 +294,38 @@ export default function ReservationPage() {
       maison: selectedHouse,
     };
 
-    try {
-      setSubmitting(true);
-      setProcessing(true);
+    // Step 5: Set loading states (after validation)
+    setSubmitting(true);
+    setProcessing(true);
 
-      // Add small delay to make spinner visible
+    try {
+      // Small delay for UX
       await new Promise(resolve => setTimeout(resolve, 150));
 
       if (editingReservation) {
+        // Update existing reservation - financial transaction is updated automatically by the API
         const updated = await reservationService.updateReservation(editingReservation, reservationData);
-        console.log('Updated reservation:', updated);
-        // Optimistically update the local state
-        setReservations(prev => {
-          const newState = prev.map(r => r.id === editingReservation ? updated : r);
-          console.log('New reservations state after update:', newState);
-          return newState;
-        });
+        console.log('✅ Updated reservation:', updated);
+        
+        setReservations(prev => prev.map(r => r.id === editingReservation ? updated : r));
         setEditingReservation(null);
+        
         toast.success("Réservation réussie", {
           description: "La réservation a été mise à jour avec succès",
         });
       } else {
+        // Create new reservation - financial transaction is created automatically by the API
         const created = await reservationService.createReservation(reservationData);
-        console.log('Created reservation:', created);
+        console.log('✅ Created reservation:', created);
         
-        // Create financial transaction for advance payment
-        if (created.montantAvance > 0) {
-          try {
-            await financeService.createReservationTransaction({
-              id: created.id,
-              nom: created.nom,
-              checkin: created.checkin,
-              montantAvance: created.montantAvance,
-              maison: created.maison
-            });
-            console.log('Created financial transaction for reservation:', created.id);
-          } catch (err) {
-            console.error('Error creating financial transaction:', err);
-            // Don't fail the reservation creation if transaction fails
-          }
-        }
+        setReservations(prev => [...prev, created]);
         
-        // Optimistically add to local state
-        setReservations(prev => {
-          const newState = [...prev, created];
-          console.log('New reservations state after create:', newState);
-          return newState;
-        });
         toast.success("Réservation réussie", {
           description: "La réservation a été créée avec succès",
         });
       }
 
-      // Reset form
+      // Step 6: Reset form data on success
       setFormData({
         nom: "",
         telephone: "",
@@ -323,28 +334,17 @@ export default function ReservationPage() {
         checkout: undefined,
         montantAvance: "",
       });
+
     } catch (err) {
       console.error('❌ Error saving reservation:', err);
-      console.error('Error details:', {
-        message: err instanceof Error ? err.message : 'Unknown error',
-        stack: err instanceof Error ? err.stack : 'No stack trace'
-      });
       toast.error("Erreur", {
-        description: "Impossible de sauvegarder la réservation",
+        description: "Impossible de sauvegarder la réservation. Vérifiez votre connexion.",
       });
     } finally {
-      console.log('✅ Form submit completed - cleaning up states');
-      console.log('✅ Current URL after operation:', window.location.href);
-      
-      // Clean up event listeners
-      window.removeEventListener('beforeunload', beforeUnloadHandler);
-      
-      // Restore original history methods
-      window.history.pushState = originalPushState;
-      window.history.replaceState = originalReplaceState;
-      
+      // Step 7: Always clean up loading states
       setSubmitting(false);
       setProcessing(false);
+      console.log('✅ Form submit completed');
     }
   };
 
@@ -377,6 +377,7 @@ export default function ReservationPage() {
         // Add small delay to make spinner visible
         await new Promise(resolve => setTimeout(resolve, 200));
         
+        // Delete the reservation - financial transactions are deleted automatically by the API
         await reservationService.deleteReservation(reservationToDelete);
         
         // Optimistically remove from local state
@@ -534,7 +535,19 @@ export default function ReservationPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form 
+              onSubmit={handleSubmit} 
+              className="space-y-4"
+              noValidate
+              autoComplete="off"
+              // Additional form attributes to prevent issues in Vite environment
+              method="POST"
+              action="#"
+              onReset={(e) => {
+                e.preventDefault();
+                console.log('🟡 Form reset prevented');
+              }}
+            >
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div className="space-y-2">
                   <Label
@@ -610,6 +623,7 @@ export default function ReservationPage() {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
+                        type="button"
                         variant="outline"
                         className={cn(
                           "w-full justify-start text-left font-normal border-slate-200 dark:border-slate-800",
@@ -643,6 +657,7 @@ export default function ReservationPage() {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
+                        type="button"
                         variant="outline"
                         className={cn(
                           "w-full justify-start text-left font-normal border-slate-200 dark:border-slate-800",
@@ -694,8 +709,12 @@ export default function ReservationPage() {
               <div className="flex justify-center space-x-2 pt-4">
                 <Button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || processing}
                   className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
+                  onClick={(e) => {
+                    // Additional safeguard - prevent any button-specific behavior
+                    e.stopPropagation();
+                  }}
                 >
                   {submitting ? (
                     <LoadingInline size={8} color="#ffffff" />
@@ -804,6 +823,7 @@ export default function ReservationPage() {
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button
+                            type="button"
                             size="sm"
                             variant="outline"
                             onClick={() => handleEdit(reservation)}
@@ -813,6 +833,7 @@ export default function ReservationPage() {
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
+                            type="button"
                             size="sm"
                             variant="outline"
                             onClick={() => handleDelete(reservation.id)}

@@ -69,24 +69,24 @@
   ],
   "reservations": [
     {
-      "id": "res-1",
       "nom": "Jean Dupont",
       "telephone": "+33123456789",
       "email": "jean.dupont@email.com",
       "checkin": "2025-08-01",
       "checkout": "2025-08-08",
-      "montantAvance": 300,
-      "maison": "maison-1"
+      "montantAvance": 200,
+      "maison": "maison-1",
+      "id": "res-1"
     },
     {
-      "id": "res-2",
       "nom": "Sophie Laurent",
       "telephone": "+33612345678",
       "email": "sophie.laurent@email.com",
       "checkin": "2025-08-01",
       "checkout": "2025-08-05",
-      "montantAvance": 200,
-      "maison": "maison-2"
+      "montantAvance": 300,
+      "maison": "maison-2",
+      "id": "res-2"
     },
     {
       "id": "res-3",
@@ -117,6 +117,16 @@
       "checkout": "2025-08-22",
       "montantAvance": 350,
       "maison": "maison-1"
+    },
+    {
+      "nom": "Sle7 Misbe7 ",
+      "telephone": "12345",
+      "email": "",
+      "checkin": "2025-08-18",
+      "checkout": "2025-08-24",
+      "montantAvance": 100,
+      "maison": "maison-2",
+      "id": "5966"
     }
   ],
   "checkins": [
@@ -247,11 +257,11 @@
   "financialOperations": [
     {
       "id": "fin-1",
-      "date": "2025-07-28",
+      "date": "2025-08-01",
       "maison": "maison-1",
       "type": "entree",
       "motif": "Avance réservation - Jean Dupont",
-      "montant": 300,
+      "montant": 200,
       "origine": "reservation",
       "reservationId": "res-1",
       "pieceJointe": null,
@@ -263,20 +273,19 @@
       "maison": "maison-1",
       "type": "entree",
       "motif": "Paiement accommodation - Jean Dupont",
-      "montant": 400,
+      "montant": 500,
       "origine": "checkin",
       "checkinId": "checkin-1",
-      "reservationId": "res-1",
       "pieceJointe": null,
       "editable": false
     },
     {
       "id": "fin-3",
-      "date": "2025-07-30",
+      "date": "2025-08-01",
       "maison": "maison-2",
       "type": "entree",
       "motif": "Avance réservation - Sophie Laurent",
-      "montant": 200,
+      "montant": 300,
       "origine": "reservation",
       "reservationId": "res-2",
       "pieceJointe": null,
@@ -288,10 +297,9 @@
       "maison": "maison-2",
       "type": "entree",
       "motif": "Paiement accommodation - Sophie Laurent",
-      "montant": 300,
+      "montant": 200,
       "origine": "checkin",
       "checkinId": "checkin-2",
-      "reservationId": "res-2",
       "pieceJointe": null,
       "editable": false
     },
@@ -366,6 +374,48 @@
       "origine": "manuel",
       "pieceJointe": "recu_supermarche.jpg",
       "editable": true
+    },
+    {
+      "id": "1128",
+      "date": "2025-08-25",
+      "maison": "maison-1",
+      "type": "entree",
+      "motif": "Avance réservation - Mohamed Amine Dogui",
+      "montant": 300,
+      "origine": "reservation",
+      "editable": false
+    },
+    {
+      "id": "ed50",
+      "date": "2025-08-03",
+      "maison": "maison-high",
+      "type": "sortie",
+      "motif": "Réparation electricite - Mihrez Trisiti",
+      "montant": 200,
+      "origine": "maintenance",
+      "editable": false
+    },
+    {
+      "id": "5b38",
+      "date": "2025-08-18",
+      "maison": "maison-2",
+      "type": "entree",
+      "motif": "Avance réservation - Sle7 Misbe7 ",
+      "montant": 100,
+      "origine": "reservation",
+      "reservationId": "5966",
+      "pieceJointe": null,
+      "editable": false
+    },
+    {
+      "id": "b59e",
+      "date": "2025-08-04",
+      "maison": "maison-bg",
+      "type": "sortie",
+      "motif": "ri9",
+      "montant": 1000,
+      "origine": "manuel",
+      "editable": true
     }
   ],
   "maintenanceIssues": [
@@ -404,6 +454,26 @@
       "photoPanne": "frigo_bruit_mv5.jpg",
       "photoFacture": null,
       "prixMainOeuvre": null
+    },
+    {
+      "maison": "maison-high",
+      "typePanne": "electricite",
+      "dateDeclaration": "2025-08-03",
+      "assigne": "Mihrez Trisiti",
+      "commentaire": "Jaw bithaw",
+      "statut": "resolue",
+      "prixMainOeuvre": 200,
+      "id": "b8aa"
+    },
+    {
+      "id": "e69b",
+      "maison": "maison-1",
+      "typePanne": "plomberie",
+      "dateDeclaration": "2025-08-04",
+      "assigne": "tayeb Kawatchou ",
+      "commentaire": "",
+      "statut": "non-resolue",
+      "photoPanne": "Anmeldung.jpg"
     }
   ],
   "maintenanceTypes": [
@@ -430,92 +500,227 @@
   ],
   "checklistCategories": [
     {
-      "id": 1,
+      "id": "1",
       "name": "Entrée"
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "Salle de Bain"
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "Couloir"
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "Cuisine"
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "Chambres"
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "Extérieur"
     }
   ],
   "checklistItems": [
     {
-      "id": "check-1",
+      "id": "check-entree-1",
       "maison": "maison-1",
       "etape": 1,
       "categorie": "Entrée",
-      "description": "Nettoyer le sol de l'entrée",
-      "produitAUtiliser": "Serpillière + Javel",
+      "description": "Nettoyage de la porte extérieure de la maison (poussière + araignées)",
+      "produitAUtiliser": "détergent, OMO, Javel",
       "type": "nettoyage"
     },
     {
-      "id": "check-2",
+      "id": "check-sdb-1",
       "maison": "maison-1",
-      "etape": 2,
-      "categorie": "Entrée",
-      "description": "Vérifier l'éclairage de l'entrée",
-      "produitAUtiliser": "Ampoules de rechange",
-      "type": "vérification"
+      "etape": 1,
+      "categorie": "Salle de Bain",
+      "description": "Nettoyage de lavabo + toilette + douche",
+      "produitAUtiliser": "détergent, OMO, Javel",
+      "type": "nettoyage"
     },
     {
-      "id": "check-3",
+      "id": "check-sdb-2",
+      "maison": "maison-1",
+      "etape": 2,
+      "categorie": "Salle de Bain",
+      "description": "Nettoyage du miroir",
+      "produitAUtiliser": "Ajax",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-sdb-3",
       "maison": "maison-1",
       "etape": 3,
       "categorie": "Salle de Bain",
-      "description": "Nettoyer la douche et les sanitaires",
-      "produitAUtiliser": "Ajax + Javel + Éponges",
+      "description": "Nettoyage interne de toilette",
+      "produitAUtiliser": "Cilac",
       "type": "nettoyage"
     },
     {
-      "id": "check-4",
+      "id": "check-sdb-4",
       "maison": "maison-1",
       "etape": 4,
       "categorie": "Salle de Bain",
-      "description": "Vérifier la plomberie",
-      "produitAUtiliser": "Outils de base",
-      "type": "vérification"
-    },
-    {
-      "id": "check-5",
-      "maison": "maison-1",
-      "etape": 5,
-      "categorie": "Cuisine",
-      "description": "Nettoyer tous les appareils électroménagers",
-      "produitAUtiliser": "OMO + Éponges + Chiffons",
+      "description": "Nettoyage de tout le faïence des murs",
+      "produitAUtiliser": "OMO, Javel, déergent",
       "type": "nettoyage"
     },
     {
-      "id": "check-6",
+      "id": "check-sdb-5",
+      "maison": "maison-1",
+      "etape": 5,
+      "categorie": "Salle de Bain",
+      "description": "Vérification de la validité de : chasse, douche, toilette, lampe, eau chaude",
+      "produitAUtiliser": "",
+      "type": "vérification"
+    },
+    {
+      "id": "check-sdb-6",
       "maison": "maison-1",
       "etape": 6,
+      "categorie": "Salle de Bain",
+      "description": "Vérification de la présence de : v-sou, bassine, frottoir, balai, serpillière",
+      "produitAUtiliser": "",
+      "type": "vérification"
+    },
+    {
+      "id": "check-couloir-1",
+      "maison": "maison-1",
+      "etape": 1,
+      "categorie": "Couloir",
+      "description": "Vérification de la validité de la lampe",
+      "produitAUtiliser": "",
+      "type": "vérification"
+    },
+    {
+      "id": "check-couloir-2",
+      "maison": "maison-1",
+      "etape": 2,
+      "categorie": "Couloir",
+      "description": "Nettoyage des toiles d'araignées (plafond et coins des murs)",
+      "produitAUtiliser": "",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-couloir-3",
+      "maison": "maison-1",
+      "etape": 3,
+      "categorie": "Couloir",
+      "description": "Nettoyage de la faïence des murs",
+      "produitAUtiliser": "OMO, Javel",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-cuisine-1",
+      "maison": "maison-1",
+      "etape": 1,
+      "categorie": "Cuisine",
+      "description": "Nettoyage du réfrigérateur (enlever tous les supports internes)",
+      "produitAUtiliser": "Cilac, Javel, déergent, détergent, pexale",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-cuisine-2",
+      "maison": "maison-1",
+      "etape": 2,
+      "categorie": "Cuisine",
+      "description": "Nettoyage du gaz + nettoyage du four",
+      "produitAUtiliser": "OMO, déengant, Javel",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-cuisine-3",
+      "maison": "maison-1",
+      "etape": 3,
+      "categorie": "Cuisine",
+      "description": "Nettoyage du plan de travail en marbre",
+      "produitAUtiliser": "Cilac, déengant, Javel, déergent",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-cuisine-4",
+      "maison": "maison-1",
+      "etape": 4,
+      "categorie": "Cuisine",
+      "description": "Nettoyage de la fenêtre (vitre + bois) + porte cuisine",
+      "produitAUtiliser": "OMO, Javel, Ajax",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-cuisine-5",
+      "maison": "maison-1",
+      "etape": 5,
+      "categorie": "Cuisine",
+      "description": "Nettoyage du placard + étagères de la cuisine (de l'intérieur + extérieur)",
+      "produitAUtiliser": "",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-cuisine-6",
+      "maison": "maison-1",
+      "etape": 6,
+      "categorie": "Cuisine",
+      "description": "Nettoyage de la faïence (autour du gaz, des taches d'huiles)",
+      "produitAUtiliser": "déergent, OMO, Javel",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-chambres-1",
+      "maison": "maison-1",
+      "etape": 1,
       "categorie": "Chambres",
-      "description": "Changer les draps et housses",
-      "produitAUtiliser": "Linge propre",
+      "description": "Enlèvement des toiles d'araignées",
+      "produitAUtiliser": "",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-chambres-2",
+      "maison": "maison-1",
+      "etape": 2,
+      "categorie": "Chambres",
+      "description": "Changement des draps + oreillers ou secours s'ils sont abîmés",
+      "produitAUtiliser": "",
       "type": "entretien"
     },
     {
-      "id": "check-7",
+      "id": "check-chambres-3",
       "maison": "maison-1",
-      "etape": 7,
+      "etape": 3,
+      "categorie": "Chambres",
+      "description": "Enlever la poussière des étagères du placard",
+      "produitAUtiliser": "",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-exterieur-1",
+      "maison": "maison-1",
+      "etape": 1,
       "categorie": "Extérieur",
-      "description": "Nettoyer la terrasse",
-      "produitAUtiliser": "Balai + Eau + Savon",
+      "description": "Nettoyage des balcons + véranda",
+      "produitAUtiliser": "",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-exterieur-2",
+      "maison": "maison-1",
+      "etape": 2,
+      "categorie": "Extérieur",
+      "description": "Nettoyage de la table + chaises plastiques",
+      "produitAUtiliser": "Javel",
+      "type": "nettoyage"
+    },
+    {
+      "id": "check-exterieur-3",
+      "maison": "maison-1",
+      "etape": 3,
+      "categorie": "Extérieur",
+      "description": "Nettoyage du parterre de toute la maison",
+      "produitAUtiliser": "eau, Javel",
       "type": "nettoyage"
     }
   ],
@@ -570,7 +775,8 @@
       "housesReady": 10,
       "paymentsCompleted": 2,
       "paymentsOpen": 3,
-      "advancePayments": 2
+      "advancePayments": 2,
+      "id": "54d9"
     },
     {
       "date": "2025-08-03",
@@ -580,7 +786,8 @@
       "housesReady": 9,
       "paymentsCompleted": 3,
       "paymentsOpen": 2,
-      "advancePayments": 3
+      "advancePayments": 3,
+      "id": "d1cc"
     },
     {
       "date": "2025-08-15",
@@ -590,86 +797,105 @@
       "housesReady": 8,
       "paymentsCompleted": 9,
       "paymentsOpen": 1,
-      "advancePayments": 1
+      "advancePayments": 1,
+      "id": "f3f2"
     }
   ],
   "occupancyData": [
     {
       "date": "2025-08-01",
       "occupied": 2,
-      "free": 10
+      "free": 10,
+      "id": "9324"
     },
     {
       "date": "2025-08-03",
       "occupied": 3,
-      "free": 9
+      "free": 9,
+      "id": "2b2a"
     },
     {
       "date": "2025-08-15",
       "occupied": 1,
-      "free": 11
+      "free": 11,
+      "id": "e39e"
     }
   ],
   "revenueData": [
     {
       "jour": "2025-08-01",
-      "revenus": 700
+      "revenus": 700,
+      "id": "6ba8"
     },
     {
       "jour": "2025-08-02",
-      "revenus": 0
+      "revenus": 0,
+      "id": "94c4"
     },
     {
       "jour": "2025-08-03",
-      "revenus": 350
+      "revenus": 350,
+      "id": "fd06"
     },
     {
       "jour": "2025-08-04",
-      "revenus": 0
+      "revenus": 0,
+      "id": "ae77"
     },
     {
       "jour": "2025-08-05",
-      "revenus": 0
+      "revenus": 0,
+      "id": "4442"
     },
     {
       "jour": "2025-08-06",
-      "revenus": 0
+      "revenus": 0,
+      "id": "7149"
     },
     {
       "jour": "2025-08-07",
-      "revenus": 180
+      "revenus": 180,
+      "id": "ac15"
     },
     {
       "jour": "2025-08-08",
-      "revenus": 0
+      "revenus": 0,
+      "id": "4192"
     },
     {
       "jour": "2025-08-09",
-      "revenus": 0
+      "revenus": 0,
+      "id": "58b0"
     },
     {
       "jour": "2025-08-10",
-      "revenus": 0
+      "revenus": 0,
+      "id": "08e9"
     },
     {
       "jour": "2025-08-11",
-      "revenus": 0
+      "revenus": 0,
+      "id": "4955"
     },
     {
       "jour": "2025-08-12",
-      "revenus": 350
+      "revenus": 350,
+      "id": "a590"
     },
     {
       "jour": "2025-08-13",
-      "revenus": 0
+      "revenus": 0,
+      "id": "9a29"
     },
     {
       "jour": "2025-08-14",
-      "revenus": 0
+      "revenus": 0,
+      "id": "0a52"
     },
     {
       "jour": "2025-08-15",
-      "revenus": 0
+      "revenus": 0,
+      "id": "894c"
     }
   ]
 }

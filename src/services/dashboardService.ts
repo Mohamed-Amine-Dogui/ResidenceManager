@@ -5,69 +5,38 @@ export const dashboardService = {
   // Get dashboard metrics for a specific date
   getDashboardMetrics: async (date?: string): Promise<DashboardMetrics> => {
     console.log('🔍 getDashboardMetrics called with date:', date);
-    const allMetrics = await api.get<Array<DashboardMetrics & { date: string }>>('/dashboardMetrics');
     
-    console.log('🔍 Raw API response - all metrics:', allMetrics);
-    console.log('🔍 Number of metrics returned:', allMetrics.length);
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (date) params.append('date', date);
     
-    // Filter by date if provided
-    let targetMetric = null;
-    if (date) {
-      console.log('🔍 Filtering for date:', date);
-      targetMetric = allMetrics.find(m => {
-        console.log('🔍 Comparing:', m.date, '===', date, '?', m.date === date);
-        return m.date === date;
-      });
-    } else {
-      targetMetric = allMetrics[0];
-    }
+    const endpoint = `/api/v1/dashboard/metrics${params.toString() ? `?${params.toString()}` : ''}`;
+    const metrics = await api.get<DashboardMetrics>(endpoint);
     
-    console.log('🔍 Found target metric:', targetMetric);
-    
-    const result = targetMetric || {
-      checkinToday: 0,
-      checkoutToday: 0,
-      maintenancesTodo: 0,
-      housesReady: 0,
-      paymentsCompleted: 0,
-      paymentsOpen: 0,
-      advancePayments: 0
-    };
-    
-    console.log('🔍 Returning dashboard metrics:', result);
-    return result;
+    console.log('🔍 Raw API response - metrics:', metrics);
+    console.log('🔍 Returning dashboard metrics:', metrics);
+    return metrics;
   },
 
   // Get house occupancy data
   getOccupancyData: async (date?: string): Promise<OccupancyData> => {
     console.log('🏠 getOccupancyData called with date:', date);
-    const allOccupancy = await api.get<Array<OccupancyData & { date: string }>>('/occupancyData');
     
-    console.log('🏠 Raw API response - all occupancy:', allOccupancy);
-    console.log('🏠 Number of occupancy records:', allOccupancy.length);
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (date) params.append('date', date);
     
-    // Filter by date if provided
-    let targetOccupancy = null;
-    if (date) {
-      console.log('🏠 Filtering for date:', date);
-      targetOccupancy = allOccupancy.find(o => {
-        console.log('🏠 Comparing:', o.date, '===', date, '?', o.date === date);
-        return o.date === date;
-      });
-    } else {
-      targetOccupancy = allOccupancy[0];
-    }
+    const endpoint = `/api/v1/dashboard/occupancy${params.toString() ? `?${params.toString()}` : ''}`;
+    const occupancy = await api.get<OccupancyData>(endpoint);
     
-    console.log('🏠 Found target occupancy:', targetOccupancy);
-    
-    const result = targetOccupancy || { occupied: 0, free: 0 };
-    console.log('🏠 Returning occupancy data:', result);
-    return result;
+    console.log('🏠 Raw API response - occupancy:', occupancy);
+    console.log('🏠 Returning occupancy data:', occupancy);
+    return occupancy;
   },
 
   // Get revenue data for charts
   getRevenueData: async (month?: number, year?: number): Promise<RevenueDataPoint[]> => {
-    let endpoint = '/revenueData';
+    let endpoint = '/api/v1/dashboard/revenue';
     const params = new URLSearchParams();
     
     if (month) params.append('month', month.toString());

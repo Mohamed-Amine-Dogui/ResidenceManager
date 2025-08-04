@@ -65,7 +65,19 @@ const AddFinanceTransaction: React.FC<Props> = ({
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form 
+        onSubmit={handleSubmit} 
+        className="space-y-4"
+        noValidate
+        autoComplete="off"
+        // Additional form attributes to prevent issues in Vite environment
+        method="POST"
+        action="#"
+        onReset={(e) => {
+          e.preventDefault();
+          console.log('🟡 Form reset prevented');
+        }}
+      >
         {/* Row: Type + Maison */}
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
@@ -119,6 +131,7 @@ const AddFinanceTransaction: React.FC<Props> = ({
             <Popover>
               <PopoverTrigger asChild>
                 <Button
+                  type="button"
                   variant="outline"
                   className="w-full justify-start text-left font-normal border-slate-200 dark:border-slate-800 bg-transparent"
                 >

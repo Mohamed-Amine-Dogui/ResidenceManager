@@ -238,8 +238,25 @@ export default function FinancePage() {
     };
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    // CRITICAL FIX FOR VITE + JSON SERVER PAGE REFRESH ISSUE:
+    // Apply the same comprehensive fix as ReservationPage
+    
+    // Step 1: IMMEDIATE prevention - before ANY other code
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Step 2: Additional safeguards for Vite dev environment
+    if (e.nativeEvent) {
+      e.nativeEvent.preventDefault();
+      e.nativeEvent.stopPropagation();
+    }
+    
+    // Step 3: Return early if event is not properly formed (Vite HMR issue)
+    if (!e || !e.currentTarget) {
+      console.warn('🟡 Invalid form event detected - this is a Vite/HMR issue');
+      return;
+    }
 
     if (submitting || processing) {
       return;

@@ -5,29 +5,29 @@ export const checkinService = {
   // Get check-in records with optional house filter
   getCheckins: async (houseId?: string): Promise<CheckInData[]> => {
     const endpoint = houseId 
-      ? `/checkins?maison=${houseId}` 
-      : '/checkins';
+      ? `/api/v1/checkins?maison=${houseId}` 
+      : '/api/v1/checkins';
     return api.get<CheckInData[]>(endpoint);
   },
 
   // Get a specific check-in record
   getCheckin: async (id: string): Promise<CheckInData> => {
-    return api.get<CheckInData>(`/checkins/${id}`);
+    return api.get<CheckInData>(`/api/v1/checkins/${id}`);
   },
 
   // Create a new check-in record
   createCheckin: async (checkin: CreateCheckIn): Promise<CheckInData> => {
-    return api.post<CheckInData>('/checkins', checkin);
+    return api.post<CheckInData>('/api/v1/checkins', checkin);
   },
 
   // Update check-in record (for check-out process)
   updateCheckin: async (id: string, updates: Partial<CreateCheckIn>): Promise<CheckInData> => {
-    return api.put<CheckInData>(`/checkins/${id}`, updates);
+    return api.put<CheckInData>(`/api/v1/checkins/${id}`, updates);
   },
 
   // Process check-out (update inventory and remarks)
   processCheckout: async (id: string, inventory: InventaireType, remarks?: string): Promise<CheckInData> => {
-    return api.put<CheckInData>(`/checkins/${id}`, {
+    return api.put<CheckInData>(`/api/v1/checkins/${id}`, {
       inventaire: inventory,
       remarques: remarks
     });
@@ -35,7 +35,7 @@ export const checkinService = {
 
   // Delete check-in record
   deleteCheckin: async (id: string): Promise<void> => {
-    return api.delete<void>(`/checkins/${id}`);
+    return api.delete<void>(`/api/v1/checkins/${id}`);
   },
 
   // Get current active check-ins for a house
