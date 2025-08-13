@@ -657,7 +657,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="py-16 text-center">
         <h1 className="text-4xl md:text-6xl font-bold text-slate-900 dark:text-slate-50 mb-8">
-          airbnb-Tunsi
+          GoDar
         </h1>
 
         {/* Search Bar - Responsive */}
