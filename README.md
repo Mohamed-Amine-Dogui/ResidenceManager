@@ -366,4 +366,3 @@ When migrating to FastAPI backend, file uploads (maintenance photos and invoices
 4. August 4: Maintenance issue in Mv2 → €150 repair cost
 5. Dashboard shows: 2 check-ins, €700 revenue, 2/12 houses occupied
 ```
-
