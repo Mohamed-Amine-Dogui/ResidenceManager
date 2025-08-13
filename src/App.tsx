@@ -19,6 +19,7 @@ import DashBoardPage from "./pages/DashBoardPage";
 import MaintenancePage from "./pages/MaintenancePage";
 import FinancePage from "./pages/FinancePage";
 import ErrorBoundary from "./components/ErrorBoundary";
+import HomePage from "./pages/HomePage";
 
 // Create router outside component to prevent re-creation
 const router = createHashRouter(
@@ -26,7 +27,8 @@ const router = createHashRouter(
     <>
       {/* Public routes (no Navbar) */}
       <Route path="/" element={<PublicLayout />}>
-        <Route index element={<LoginPage />} />
+        <Route index element={<HomePage />} />
+        <Route path="login" element={<LoginPage />} />
       </Route>
 
       {/* Private routes (with Navbar) */}
@@ -46,13 +48,13 @@ const router = createHashRouter(
     // Add future flags to prevent warnings and improve stability
     future: {
       v7_relativeSplatPath: true,
-    }
+    },
   }
 );
 
 const App = () => {
-  console.log('🚀 App component rendering - This should only appear ONCE!');
-  
+  console.log("🚀 App component rendering - This should only appear ONCE!");
+
   return (
     <ErrorBoundary>
       <RouterProvider router={router} />

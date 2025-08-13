@@ -4,14 +4,14 @@
 
 ##  Features
 
-- ** Reservation Management**: Complete booking system with calendar view and availability checking
-- ** Check-in/Check-out System**: Guest management with inventory tracking and payment processing
-- ** Maintenance Tracking**: Issue reporting, assignment, and resolution tracking
-- ** Financial Operations**: Automated transaction recording and manual expense tracking
-- ** Real-time Dashboard**: Date-based analytics with occupancy charts and revenue tracking
-- ** Quality Control**: House readiness checklists and category-based status tracking
-- ** Dark/Light Mode**: Full theme support throughout the application
-- ** Responsive Design**: Mobile-first design with modern UI components
+- **Reservation Management**: Complete booking system with calendar view and availability checking
+- **Check-in/Check-out System**: Guest management with inventory tracking and payment processing
+- **Maintenance Tracking**: Issue reporting, assignment, and resolution tracking
+- **Financial Operations**: Automated transaction recording and manual expense tracking
+- **Real-time Dashboard**: Date-based analytics with occupancy charts and revenue tracking
+- **Quality Control**: House readiness checklists and category-based status tracking
+- **Dark/Light Mode**: Full theme support throughout the application
+- **Responsive Design**: Mobile-first design with modern UI components
 
 ##  Architecture
 
